@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MD</title>
+    <!-- رابط أيقونة الصفحة (Favicon) -->
+    <link rel="icon" type="image/x-icon" href="xxx.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(180deg, #0044ff, #0787ff5b); /* خلفية متدرجة */
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 4rem; /* حجم أكبر */
+            color: #fff;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 3px; /* تباعد أكبر */
+            animation: fadeIn 2s ease-in-out;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* ظل للنص */
+        }
+
+        .logo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo:hover {
+            transform: rotate(360deg) scale(1.1); /* تدوير وتكبير اللوجو */
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3); /* ظل أكبر */
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .icons-container {
+            display: flex;
+            gap: 2rem;
+            animation: slideIn 1.5s ease-in-out;
+            flex-wrap: wrap; /* لجعل الرموز تتناسب مع الشاشات الصغيرة */
+            justify-content: center;
+        }
+
+        .icon {
+            width: 5.625rem;
+            height: 5.625rem;
+            background-color: rgba(255, 255, 255, 0.1); /* خلفية شفافة */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.3); /* حدود شفافة */
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+        }
+
+        .icon:hover {
+            transform: translateY(-10px) scale(1.1); /* تكبير الرمز */
+            background-color: rgba(255, 255, 255, 0.2); /* تغيير لون الخلفية عند التمرير */
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2); /* ظل أكبر */
+        }
+
+        .icon:before {
+            background: var(--color);
+            content: "";
+            position: absolute;
+            width: 130%;
+            height: 130%;
+            left: -110%;
+            top: 80%;
+            transform: rotate(45deg);
+            z-index: 0;
+        }
+
+        .icon:hover::before {
+            animation: slide 0.7s forwards;
+        }
+
+        .icon i {
+            z-index: 1;
+            transition: all 0.3s ease;
+            font-size: 2.5rem; /* حجم أكبر */
+            color: #fff;
+        }
+
+        .icon:hover > i {
+            scale: 1.2;
+            color: #f1f1f1;
+        }
+
+        /* حركة الخلفية */
+        @keyframes moveBackground {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-50%);
+            }
+        }
+
+        /* حركة العنوان */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* حركة الرموز */
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* حركة الانزلاق */
+        @keyframes slide {
+            50% {
+                left: 10%;
+                top: -40%;
+            }
+            100% {
+                left: -15%;
+                top: -15%;
+            }
+        }
+
+        /* فقاعات الخلفية المتحركة */
+        .background-bubbles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .background-bubbles li {
+            position: absolute;
+            list-style: none;
+            display: block;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            bottom: -150px;
+            animation: bubble 15s infinite;
+            border-radius: 50%;
+        }
+
+        .background-bubbles li:nth-child(1) {
+            left: 5%;
+            width: 80px;
+            height: 80px;
+            animation-delay: 2s;
+        }
+
+        .background-bubbles li:nth-child(2) {
+            left: 15%;
+            width: 20px;
+            height: 20px;
+            animation-delay: 4s;
+        }
+
+        .background-bubbles li:nth-child(3) {
+            left: 70%;
+            width: 60px;
+            height: 60px;
+            animation-delay: 6s;
+        }
+
+        .background-bubbles li:nth-child(4) {
+            left: 40%;
+            width: 40px;
+            height: 40px;
+            animation-delay: 8s;
+        }
+
+        .background-bubbles li:nth-child(5) {
+            left: 65%;
+            width: 30px;
+            height: 30px;
+            animation-delay: 10s;
+        }
+
+        .background-bubbles li:nth-child(6) {
+            left: 85%;
+            width: 50px;
+            height: 50px;
+            animation-delay: 3s;
+        }
+
+        .background-bubbles li:nth-child(7) {
+            left: 25%;
+            width: 25px;
+            height: 25px;
+            animation-delay: 7s;
+        }
+
+        @keyframes bubble {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* زر العودة إلى الأعلى */
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-to-top:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .back-to-top i {
+            color: #fff;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- فقاعات الخلفية المتحركة -->
+    <ul class="background-bubbles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="wrapper">
+        <!-- العنوان -->
+        <div class="logo">
+           <a href="Untitled-1.html"><img src="xxx.png" alt="x-icon"></a> 
+        </div>
+
+        <!-- الرموز -->
+        <div class="icons-container">
+            <!-- Instagram -->
+            <a href="https://www.instagram.com/md_amine_ld?utm_source=qr" class="icon" style="--color: #E4405F;">
+                <i class="fa-brands fa-instagram"></i>
+            </a>
+            <!-- YouTube -->
+            <a href="https://www.youtube.com/@LD__GG" class="icon" style="--color: #ff1702;">
+                <i class="fa-brands fa-youtube"></i>
+            </a>
+            <!-- Gmail -->
+            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=moh05lpb@gmail.com" target="_self" class="icon" style="--color: #D14836;">
+                <i class="fa-solid fa-envelope"></i>
+            </a>
+            <!-- Facebook -->
+            <a href="https://www.facebook.com/profile.php?id=61559218980572&locale=ar_AR" class="icon" style="--color: #1645dd;">
+                <i class="fa-brands fa-facebook-f"></i>
+            </a>
+            <!-- TikTok -->
+            <a href="https://www.tiktok.com/@layadi_05_ld" class="icon" style="--color: #000000;">
+                <i class="fa-brands fa-tiktok"></i>
+            </a>
+            <!-- Telegram -->
+            <a href="https://t.me/moh05lpb" class="icon" style="--color: #1997d6;">
+                <i class="fa-brands fa-telegram"></i>
+            </a>
+        </div>
+    </div>
+
+   
+</body>
+</html>
