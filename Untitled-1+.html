@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>اختر جهازك</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.4em;
+      margin-bottom: 30px;
+      text-shadow: 0 0 10px #00ffe7;
+    }
+
+    .devices {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .device {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px 20px;
+      width: 160px;
+      cursor: pointer;
+      transition: transform 0.3s, background 0.3s;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    .device:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    .device i {
+      font-size: 50px;
+      color: #00ffd9;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .device span {
+      display: block;
+      font-size: 1.3em;
+      margin-top: 5px;
+    }
+
+    .emoji {
+      font-size: 30px;
+      margin-left: 5px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.6em;
+      }
+      .device {
+        width: 130px;
+        padding: 20px;
+      }
+      .device i {
+        font-size: 40px;
+      }
+      .device span {
+        font-size: 1.1em;
+      }
+      .emoji {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>اختر الجهاز الذي تستخدمه</h1>
+
+  <div class="devices">
+    <div class="device" onclick="location.href='https://linktr.ee/moh_ld'">
+      <i class="fas fa-mobile-alt"></i>
+      <span><span class="emoji">📱</span>هاتف</span>
+    </div>
+    <div class="device" onclick="location.href='https://mddd5416.github.io/my-website/Untitled-1.html'">
+      <i class="fas fa-laptop"></i>
+      <span><span class="emoji">💻</span>حاسوب</span>
+    </div>
+  </div>
+
+</body>
+</html>
