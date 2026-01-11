@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Clone - GitHub</title>
+    <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+    <style>
+        :root {
+            --bg-dark: #36393f;
+            --bg-side: #2f3136;
+            --bg-input: #40444b;
+            --discord-blue: #5865f2;
+            --text-main: #dcddde;
+        }
+
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            margin: 0; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden;
+        }
+
+        /* تصميم القائمة الجانبية البسيطة */
+        .sidebar {
+            width: 240px;
+            background-color: var(--bg-side);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 10px;
+        }
+
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat-container { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+        }
+
+        .message { 
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .user-name { 
+            font-weight: bold; 
+            color: #fff; 
+            font-size: 0.95em;
+            margin-bottom: 2px;
+        }
+
+        .message-text {
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        #input-area { 
+            background-color: var(--bg-dark); 
+            padding: 20px; 
+            display: flex; 
+            gap: 10px; 
+        }
+
+        input { 
+            flex: 1; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            background-color: var(--bg-input); 
+            color: white; 
+            outline: none; 
+        }
+
+        button { 
+            padding: 10px 25px; 
+            border: none; 
+            border-radius: 5px; 
+            background-color: var(--discord-blue); 
+            color: white; 
+            font-weight: bold;
+            cursor: pointer; 
+        }
+
+        button:hover { background-color: #4752c4; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h3 style="color: white;"># عام</h3>
+        <p style="font-size: 0.8em; color: #8e9297;">أهلاً بك في غرفة الدردشة العامة</p>
+    </div>
+
+    <div class="main-chat">
+        <div id="chat-container"></div>
+
+        <form id="chat-form">
+            <div id="input-area">
+                <input id="username" type="text" placeholder="اسمك.." style="width: 100px; flex: 0;" required>
+                <input id="message-input" type="text" placeholder="اكتب رسالة..." autocomplete="off" required>
+                <button type="submit">إرسال</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // ملاحظة: للحصول على مفتاح خاص بك مجاناً، سجل في ably.com
+        // هذا مفتاح تجريبي محدود للاختبار فقط
+        const API_KEY = 'YOUR_ABLY_API_KEY_HERE'; 
+        const ably = new Ably.Realtime('8xMv_Q.m_O8bg:4B-kXmB-XN8V2-pAjkE6mY-X8'); // مفتاح اختبار
+        const channel = ably.channels.get('chat-room');
+
+        const chatContainer = document.getElementById('chat-container');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        const usernameInput = document.getElementById('username');
+
+        // استقبال الرسائل من أي شخص
+        channel.subscribe('message', (msg) => {
+            const { user, text } = msg.data;
+            addMessageToUI(user, text);
+        });
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = messageInput.value;
+            const user = usernameInput.value;
+
+            // إرسال الرسالة للجميع
+            channel.publish('message', { user, text });
+            messageInput.value = '';
+        });
+
+        function addMessageToUI(user, text) {
+            const div = document.createElement('div');
+            div.className = 'message';
+            div.innerHTML = `
+                <span class="user-name">${user}</span>
+                <span class="message-text">${text}</span>
+            `;
+            chatContainer.appendChild(div);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
