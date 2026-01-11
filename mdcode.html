@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord Clone - GitHub</title>
+    <title>Discord Clone + Voice</title>
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
             --bg-dark: #36393f;
             --bg-side: #2f3136;
             --bg-input: #40444b;
             --discord-blue: #5865f2;
+            --discord-green: #3ba55d;
             --text-main: #dcddde;
         }
 
@@ -24,20 +26,16 @@
             overflow: hidden;
         }
 
-        /* تصميم القائمة الجانبية البسيطة */
         .sidebar {
             width: 240px;
             background-color: var(--bg-side);
             display: flex;
             flex-direction: column;
-            padding: 20px 10px;
+            padding: 20px 15px;
+            gap: 20px;
         }
 
-        .main-chat {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
+        .main-chat { flex: 1; display: flex; flex-direction: column; }
 
         #chat-container { 
             flex: 1; 
@@ -48,61 +46,36 @@
             gap: 15px; 
         }
 
-        .message { 
-            display: flex;
-            flex-direction: column;
-            animation: fadeIn 0.3s ease;
-        }
-
+        .message { animation: fadeIn 0.3s ease; border-bottom: 1px solid #40444b33; padding-bottom: 5px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .user-name { 
-            font-weight: bold; 
-            color: #fff; 
-            font-size: 0.95em;
-            margin-bottom: 2px;
-        }
+        .user-name { font-weight: bold; color: #fff; display: block; }
 
-        .message-text {
-            color: var(--text-main);
-            line-height: 1.4;
-        }
+        #input-area { background-color: var(--bg-dark); padding: 20px; display: flex; gap: 10px; border-top: 1px solid #40444b; }
+        input { flex: 1; padding: 12px; border: none; border-radius: 8px; background-color: var(--bg-input); color: white; outline: none; }
+        
+        button { padding: 10px 20px; border: none; border-radius: 5px; background-color: var(--discord-blue); color: white; cursor: pointer; font-weight: bold; }
+        .btn-voice { background-color: var(--discord-green); width: 100%; margin-top: 10px; }
 
-        #input-area { 
-            background-color: var(--bg-dark); 
-            padding: 20px; 
-            display: flex; 
-            gap: 10px; 
-        }
-
-        input { 
-            flex: 1; 
-            padding: 12px; 
-            border: none; 
-            border-radius: 8px; 
-            background-color: var(--bg-input); 
-            color: white; 
-            outline: none; 
-        }
-
-        button { 
-            padding: 10px 25px; 
-            border: none; 
-            border-radius: 5px; 
-            background-color: var(--discord-blue); 
-            color: white; 
-            font-weight: bold;
-            cursor: pointer; 
-        }
-
-        button:hover { background-color: #4752c4; }
+        .voice-status { font-size: 0.8em; color: #8e9297; margin-top: 5px; }
+        .active-call { color: #3ba55d; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <h3 style="color: white;"># عام</h3>
-        <p style="font-size: 0.8em; color: #8e9297;">أهلاً بك في غرفة الدردشة العامة</p>
+        <h3 style="color: white; margin-top: 0;"># غرفة عامة</h3>
+        
+        <div>
+            <label style="font-size: 0.8em;">اسمك المستعار:</label>
+            <input id="username" type="text" placeholder="اسمك.." style="width: 90%; margin-top: 5px;">
+        </div>
+
+        <div style="margin-top: 20px; border-top: 1px solid #484c52; pt: 10px;">
+            <p style="font-size: 0.9em; margin-bottom: 5px;">التواصل الصوتي:</p>
+            <button id="start-voice" class="btn-voice">بدء اتصال صوتي</button>
+            <div id="voice-users" class="voice-status">لا يوجد اتصال نشط</div>
+        </div>
     </div>
 
     <div class="main-chat">
@@ -110,7 +83,6 @@
 
         <form id="chat-form">
             <div id="input-area">
-                <input id="username" type="text" placeholder="اسمك.." style="width: 100px; flex: 0;" required>
                 <input id="message-input" type="text" placeholder="اكتب رسالة..." autocomplete="off" required>
                 <button type="submit">إرسال</button>
             </div>
@@ -118,42 +90,85 @@
     </div>
 
     <script>
-        // ملاحظة: للحصول على مفتاح خاص بك مجاناً، سجل في ably.com
-        // هذا مفتاح تجريبي محدود للاختبار فقط
-        const API_KEY = 'YOUR_ABLY_API_KEY_HERE'; 
-        const ably = new Ably.Realtime('QM4eOw.xY9zIA:gq3Qc0mxi12fEJZCzygsUQqp0Uz97U0tWZWCvVWTbN4'); // مفتاح اختبار
-        const channel = ably.channels.get('chat-room');
+        // --- الإعدادات الأساسية ---
+        const ably = new Ably.Realtime('QM4eOw.xY9zIA:gq3Qc0mxi12fEJZCzygsUQqp0Uz97U0tWZWCvVWTbN4'); 
+        const chatChannel = ably.channels.get('chat-room');
+        const voiceChannel = ably.channels.get('voice-updates');
+        
+        const peer = new Peer(); // لإنشاء معرف فريد للصوت P2P
+        let myPeerId = "";
 
         const chatContainer = document.getElementById('chat-container');
-        const chatForm = document.getElementById('chat-form');
-        const messageInput = document.getElementById('message-input');
         const usernameInput = document.getElementById('username');
+        const messageInput = document.getElementById('message-input');
+        const voiceBtn = document.getElementById('start-voice');
 
-        // استقبال الرسائل من أي شخص
-        channel.subscribe('message', (msg) => {
-            const { user, text } = msg.data;
-            addMessageToUI(user, text);
+        // --- 1. ميزة حفظ الاسم ---
+        const savedName = localStorage.getItem('chat-username');
+        if (savedName) {
+            usernameInput.value = savedName;
+        }
+
+        usernameInput.addEventListener('input', () => {
+            localStorage.setItem('chat-username', usernameInput.value);
         });
 
-        chatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const text = messageInput.value;
-            const user = usernameInput.value;
+        // --- 2. ميزة الدردشة النصية ---
+        chatChannel.subscribe('message', (msg) => {
+            const div = document.createElement('div');
+            div.className = 'message';
+            div.innerHTML = `<span class="user-name">${msg.data.user}</span><span>${msg.data.text}</span>`;
+            chatContainer.appendChild(div);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
 
-            // إرسال الرسالة للجميع
-            channel.publish('message', { user, text });
+        document.getElementById('chat-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const user = usernameInput.value || "مجهول";
+            chatChannel.publish('message', { user, text: messageInput.value });
             messageInput.value = '';
         });
 
-        function addMessageToUI(user, text) {
-            const div = document.createElement('div');
-            div.className = 'message';
-            div.innerHTML = `
-                <span class="user-name">${user}</span>
-                <span class="message-text">${text}</span>
-            `;
-            chatContainer.appendChild(div);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+        // --- 3. ميزة التواصل الصوتي (WebRTC) ---
+        peer.on('open', (id) => {
+            myPeerId = id;
+        });
+
+        // استقبال مكالمة صوتية
+        peer.on('call', (call) => {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                call.answer(stream); // الرد بميكروفونك
+                call.on('stream', (remoteStream) => {
+                    playStream(remoteStream);
+                });
+            });
+        });
+
+        voiceBtn.addEventListener('click', () => {
+            voiceBtn.disabled = true;
+            voiceBtn.innerText = "متصل بالصوت...";
+            document.getElementById('voice-users').innerHTML = "<span class='active-call'>أنت في اتصال الآن</span>";
+
+            // إبلاغ الآخرين بأنني متاح للصوت
+            voiceChannel.publish('new-voice-user', { peerId: myPeerId, name: usernameInput.value });
+        });
+
+        // عندما يعلن شخص جديد أنه بدأ اتصالاً صوتياً، نتصل به تلقائياً
+        voiceChannel.subscribe('new-voice-user', (data) => {
+            if (data.data.peerId !== myPeerId) {
+                navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                    const call = peer.call(data.data.peerId, stream);
+                    call.on('stream', (remoteStream) => {
+                        playStream(remoteStream);
+                    });
+                });
+            }
+        });
+
+        function playStream(stream) {
+            const audio = document.createElement('audio');
+            audio.srcObject = stream;
+            audio.play();
         }
     </script>
 </body>
