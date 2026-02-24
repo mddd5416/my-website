@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raccourci</title>
-	<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+    <title>لوحة اختصاراتي الاحترافية</title>
+    
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/880/880910.png">
+    
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1160/1160358.png">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -171,7 +175,6 @@
             text-overflow: ellipsis;
         }
 
-        /* زر الحذف المطور */
         .delete-btn {
             position: absolute;
             top: -10px;
@@ -182,7 +185,7 @@
             border-radius: 50%;
             width: 28px;
             height: 28px;
-            display: none; /* مخفي افتراضياً */
+            display: none;
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -191,7 +194,6 @@
             font-size: 14px;
         }
 
-        /* وضع التعديل (الاهتزاز) */
         .edit-mode .delete-btn { display: flex; }
         .edit-mode .app-item { animation: wobble 0.3s infinite; }
 
@@ -207,7 +209,6 @@
             100% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0); }
         }
 
-        /* للموبايل */
         @media (max-width: 600px) {
             .app-grid { padding: 100px 20px; gap: 20px; }
             .app-icon-wrapper { width: 70px; height: 70px; }
@@ -217,7 +218,7 @@
 <body>
 
     <div class="top-controls">
-        <div class="control-btn" id="editToggle" onclick="toggleEditMode()" title="تعديل الاختصارات">
+        <div class="control-btn" id="editToggle" onclick="toggleEditMode()" title="تعديل">
             <i class="fas fa-pen"></i>
         </div>
         <div class="control-btn menu-trigger" onclick="toggleSidebar()">
@@ -232,14 +233,9 @@
             <input type="url" id="siteUrl" placeholder="الرابط (https://...)">
         </div>
         <button class="add-btn" onclick="addShortcut()">إضافة للوحة</button>
-        <p style="font-size: 11px; color: #888; margin-top: 25px; line-height: 1.6;">
-            * سيتم سحب أيقونة الموقع تلقائياً.<br>
-            * اضغط على زر القلم لتتمكن من حذف الاختصارات.
-        </p>
     </div>
 
-    <div class="app-grid" id="appGrid">
-        </div>
+    <div class="app-grid" id="appGrid"></div>
 
     <script>
         let shortcuts = JSON.parse(localStorage.getItem('myShortcuts')) || [];
@@ -253,7 +249,6 @@
             isEditMode = !isEditMode;
             const btn = document.getElementById('editToggle');
             const grid = document.getElementById('appGrid');
-            
             if (isEditMode) {
                 btn.classList.add('edit-active');
                 btn.innerHTML = '<i class="fas fa-check"></i>';
@@ -268,26 +263,16 @@
         function addShortcut() {
             const name = document.getElementById('siteName').value;
             let url = document.getElementById('siteUrl').value;
-
-            if (!name || !url) {
-                alert("يرجى إدخال الاسم والرابط");
-                return;
-            }
-
-            if (!url.startsWith('http')) {
-                url = 'https://' + url;
-            }
-
+            if (!name || !url) { alert("يرجى إدخال الاسم والرابط"); return; }
+            if (!url.startsWith('http')) { url = 'https://' + url; }
             const newShortcut = {
                 id: Date.now(),
                 name: name,
                 url: url,
                 icon: `https://www.google.com/s2/favicons?sz=128&domain=${url}`
             };
-
             shortcuts.push(newShortcut);
             saveAndRender();
-            
             document.getElementById('siteName').value = '';
             document.getElementById('siteUrl').value = '';
             toggleSidebar();
@@ -306,7 +291,6 @@
         function render() {
             const grid = document.getElementById('appGrid');
             grid.innerHTML = '';
-
             shortcuts.forEach(s => {
                 grid.innerHTML += `
                     <div class="app-item">
@@ -323,10 +307,8 @@
                 `;
             });
         }
-
         render();
 
-        // إغلاق القائمة عند الضغط بالخارج
         window.onclick = function(event) {
             const sidebar = document.getElementById('sidebar');
             const menuTrigger = document.querySelector('.menu-trigger');
@@ -336,5 +318,4 @@
         }
     </script>
 </body>
-
 </html>
