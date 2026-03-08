@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raccourci</title>
+    <title>Raccourci - Custom Icons</title>
     
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/880/880910.png">
-    
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1160/1160358.png">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -30,7 +29,6 @@
             overflow-x: hidden;
         }
 
-        /* أدوات التحكم العلوية */
         .top-controls {
             position: fixed;
             top: 20px;
@@ -50,7 +48,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s;
             backdrop-filter: blur(10px);
             color: white;
             font-size: 20px;
@@ -59,15 +57,8 @@
         .control-btn:hover {
             background: var(--accent-color);
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3);
         }
 
-        .control-btn.edit-active {
-            background: var(--danger-color);
-            animation: pulse 1.5s infinite;
-        }
-
-        /* قائمة الإضافة الجانبية */
         .sidebar {
             position: fixed;
             top: 0;
@@ -81,34 +72,34 @@
             transition: 0.5s cubic-bezier(0.77, 0, 0.175, 1);
             z-index: 999;
             border-left: 1px solid var(--glass-border);
+            overflow-y: auto;
         }
 
         .sidebar.active { right: 0; }
 
-        .sidebar h2 {
-            margin-top: 60px;
-            font-weight: 300;
-            letter-spacing: 1px;
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 10px;
-        }
+        .sidebar h2 { margin-top: 60px; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; }
 
-        .input-group { margin: 30px 0; }
+        .input-group { margin: 20px 0; }
 
-        input {
+        input[type="text"], input[type="url"], input[type="file"] {
             width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 12px;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
             border: 1px solid var(--glass-border);
             background: rgba(255,255,255,0.05);
             color: white;
             box-sizing: border-box;
             outline: none;
-            transition: 0.3s;
         }
 
-        input:focus { border-color: var(--accent-color); background: rgba(255,255,255,0.1); }
+        .file-input-wrapper {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px dashed var(--accent-color);
+            border-radius: 10px;
+            text-align: center;
+        }
 
         .add-btn {
             width: 100%;
@@ -119,11 +110,9 @@
             border-radius: 12px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 16px;
-            transition: 0.3s;
+            margin-top: 10px;
         }
 
-        /* شبكة التطبيقات */
         .app-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -138,7 +127,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: 0.3s;
         }
 
         .app-icon-wrapper {
@@ -150,30 +138,13 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 12px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
             backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: 0.4s;
             overflow: hidden;
         }
 
-        .app-icon-wrapper img { width: 45px; height: 45px; object-fit: contain; }
-
-        .app-item:hover .app-icon-wrapper {
-            transform: scale(1.1);
-            border-color: var(--accent-color);
-        }
-
-        .app-name {
-            font-size: 13px;
-            font-weight: 400;
-            text-align: center;
-            opacity: 0.9;
-            max-width: 100px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .app-icon-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
         .delete-btn {
             position: absolute;
@@ -190,8 +161,6 @@
             justify-content: center;
             cursor: pointer;
             z-index: 10;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            font-size: 14px;
         }
 
         .edit-mode .delete-btn { display: flex; }
@@ -202,28 +171,13 @@
             50% { transform: rotate(-1deg); }
             100% { transform: rotate(1deg); }
         }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(255, 75, 43, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0); }
-        }
-
-        @media (max-width: 600px) {
-            .app-grid { padding: 100px 20px; gap: 20px; }
-            .app-icon-wrapper { width: 70px; height: 70px; }
-        }
     </style>
 </head>
 <body>
 
     <div class="top-controls">
-        <div class="control-btn" id="editToggle" onclick="toggleEditMode()" title="تعديل">
-            <i class="fas fa-pen"></i>
-        </div>
-        <div class="control-btn menu-trigger" onclick="toggleSidebar()">
-            <i class="fas fa-plus"></i>
-        </div>
+        <div class="control-btn" id="editToggle" onclick="toggleEditMode()"><i class="fas fa-pen"></i></div>
+        <div class="control-btn menu-trigger" onclick="toggleSidebar()"><i class="fas fa-plus"></i></div>
     </div>
 
     <div class="sidebar" id="sidebar">
@@ -231,8 +185,20 @@
         <div class="input-group">
             <input type="text" id="siteName" placeholder="اسم الموقع">
             <input type="url" id="siteUrl" placeholder="الرابط (https://...)">
+            
+            <hr style="opacity: 0.1; margin: 20px 0;">
+            <label style="font-size: 14px; color: var(--accent-color);">الأيقونة:</label>
+            
+            <input type="url" id="siteIconUrl" placeholder="رابط صورة من الإنترنت">
+            
+            <p style="text-align: center; margin: 5px 0; font-size: 12px; opacity: 0.5;">أو</p>
+            
+            <div class="file-input-wrapper">
+                <input type="file" id="siteIconFile" accept="image/*" style="font-size: 12px;">
+                <small style="display:block; opacity: 0.7;">اختر صورة من حاسوبك</small>
+            </div>
         </div>
-        <button class="add-btn" onclick="addShortcut()">إضافة للوحة</button>
+        <button class="add-btn" onclick="processAndAdd()">إضافة للوحة</button>
     </div>
 
     <div class="app-grid" id="appGrid"></div>
@@ -241,40 +207,53 @@
         let shortcuts = JSON.parse(localStorage.getItem('myShortcuts')) || [];
         let isEditMode = false;
 
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-        }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
 
         function toggleEditMode() {
             isEditMode = !isEditMode;
             const btn = document.getElementById('editToggle');
             const grid = document.getElementById('appGrid');
-            if (isEditMode) {
-                btn.classList.add('edit-active');
-                btn.innerHTML = '<i class="fas fa-check"></i>';
-                grid.classList.add('edit-mode');
+            btn.innerHTML = isEditMode ? '<i class="fas fa-check"></i>' : '<i class="fas fa-pen"></i>';
+            btn.style.background = isEditMode ? 'var(--danger-color)' : 'var(--card-bg)';
+            grid.classList.toggle('edit-mode');
+        }
+
+        // دالة لمعالجة الصورة سواء كانت ملف أو رابط
+        async function processAndAdd() {
+            const name = document.getElementById('siteName').value;
+            let url = document.getElementById('siteUrl').value;
+            const iconUrl = document.getElementById('siteIconUrl').value;
+            const iconFile = document.getElementById('siteIconFile').files[0];
+
+            if (!name || !url) { alert("يرجى إدخال الاسم والرابط"); return; }
+            if (!url.startsWith('http')) url = 'https://' + url;
+
+            let finalIcon = `https://www.google.com/s2/favicons?sz=128&domain=${url}`;
+
+            if (iconFile) {
+                // تحويل الصورة المرفوعة إلى Base64
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    addShortcut(name, url, e.target.result);
+                };
+                reader.readAsDataURL(iconFile);
+            } else if (iconUrl.trim() !== "") {
+                addShortcut(name, url, iconUrl);
             } else {
-                btn.classList.remove('edit-active');
-                btn.innerHTML = '<i class="fas fa-pen"></i>';
-                grid.classList.remove('edit-mode');
+                addShortcut(name, url, finalIcon);
             }
         }
 
-        function addShortcut() {
-            const name = document.getElementById('siteName').value;
-            let url = document.getElementById('siteUrl').value;
-            if (!name || !url) { alert("يرجى إدخال الاسم والرابط"); return; }
-            if (!url.startsWith('http')) { url = 'https://' + url; }
-            const newShortcut = {
-                id: Date.now(),
-                name: name,
-                url: url,
-                icon: `https://www.google.com/s2/favicons?sz=128&domain=${url}`
-            };
+        function addShortcut(name, url, icon) {
+            const newShortcut = { id: Date.now(), name, url, icon };
             shortcuts.push(newShortcut);
             saveAndRender();
+            
+            // إعادة ضبط الحقول
             document.getElementById('siteName').value = '';
             document.getElementById('siteUrl').value = '';
+            document.getElementById('siteIconUrl').value = '';
+            document.getElementById('siteIconFile').value = '';
             toggleSidebar();
         }
 
@@ -294,9 +273,7 @@
             shortcuts.forEach(s => {
                 grid.innerHTML += `
                     <div class="app-item">
-                        <div class="delete-btn" onclick="deleteShortcut(${s.id})">
-                            <i class="fas fa-times"></i>
-                        </div>
+                        <div class="delete-btn" onclick="deleteShortcut(${s.id})"><i class="fas fa-times"></i></div>
                         <a href="${s.url}" target="_blank" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center;">
                             <div class="app-icon-wrapper">
                                 <img src="${s.icon}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1243/1243966.png'">
@@ -307,16 +284,8 @@
                 `;
             });
         }
-        render();
 
-        window.onclick = function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const menuTrigger = document.querySelector('.menu-trigger');
-            if (!sidebar.contains(event.target) && !menuTrigger.contains(event.target) && sidebar.classList.contains('active')) {
-                toggleSidebar();
-            }
-        }
+        render();
     </script>
 </body>
 </html>
-
