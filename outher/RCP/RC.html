@@ -3,180 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raccourci - Professional Edition</title>
+    <title>Raccourci Pro - PC Storage</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            --accent-color: #00d2ff;
-            --danger-color: #ff4b2b;
-            --card-bg: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --bg: #0f0c29;
+            --accent: #00d2ff;
+            --card-bg: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.1);
         }
 
         body {
             margin: 0; font-family: 'Segoe UI', sans-serif;
-            background: var(--bg-gradient); background-attachment: fixed;
-            color: white; min-height: 100vh; overflow-x: hidden;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background-attachment: fixed; color: white; min-height: 100vh;
         }
 
-        .top-controls { position: fixed; top: 20px; right: 20px; display: flex; gap: 15px; z-index: 1000; }
-        .control-btn {
-            width: 50px; height: 50px; background: var(--card-bg); border: 1px solid var(--glass-border);
-            border-radius: 15px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.3s; color: white; backdrop-filter: blur(10px);
+        /* التحكم العلوي */
+        .top-controls { position: fixed; top: 25px; right: 25px; display: flex; gap: 15px; z-index: 1000; }
+        .btn-circle {
+            width: 55px; height: 55px; background: var(--card-bg);
+            border: 1px solid var(--border); border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.3s; backdrop-filter: blur(15px); color: white; font-size: 20px;
         }
-        .control-btn:hover { background: var(--accent-color); transform: translateY(-3px); }
+        .btn-circle:hover { background: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
 
+        /* القائمة الجانبية */
         .sidebar {
             position: fixed; top: 0; right: -350px; width: 320px; height: 100%;
-            background: rgba(15, 12, 41, 0.95); backdrop-filter: blur(20px);
-            padding: 30px; transition: 0.5s; z-index: 999; border-left: 1px solid var(--glass-border);
+            background: rgba(10, 10, 30, 0.9); backdrop-filter: blur(25px);
+            padding: 40px 20px; transition: 0.5s cubic-bezier(0.7, 0, 0.3, 1);
+            z-index: 999; border-left: 1px solid var(--border);
         }
         .sidebar.active { right: 0; }
 
-        .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 40px; padding: 120px 40px; max-width: 1100px; margin: 0 auto; }
-        .app-item { position: relative; display: flex; flex-direction: column; align-items: center; transition: 0.4s; }
-        
-        .app-icon-wrapper {
-            width: 85px; height: 85px; background: var(--card-bg); border-radius: 22px;
-            display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
-            backdrop-filter: blur(15px); border: 1px solid var(--glass-border); overflow: hidden;
-        }
-        .app-icon-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-
-        .primary-btn {
-            width: 100%; padding: 15px; background: linear-gradient(to right, #00d2ff, #3a7bd5);
-            color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px;
+        /* الشبكة */
+        .app-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 45px; padding: 130px 50px; max-width: 1200px; margin: 0 auto;
         }
 
-        input {
-            width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px;
-            border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: white; outline: none;
+        .app-item { position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .icon-box {
+            width: 90px; height: 90px; background: var(--card-bg);
+            border-radius: 24px; border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 15px; transition: 0.3s; overflow: hidden; backdrop-filter: blur(10px);
         }
+        .icon-box img { width: 100%; height: 100%; object-fit: cover; }
+        .app-item:hover .icon-box { transform: scale(1.05); border-color: var(--accent); }
 
-        .action-btns { position: absolute; top: -15px; display: none; gap: 6px; z-index: 10; }
+        /* وضع التعديل */
+        .edit-mode .app-item { animation: wobble 0.3s infinite ease-in-out; }
+        .action-btns { position: absolute; top: -10px; display: none; gap: 8px; z-index: 20; }
         .edit-mode .action-btns { display: flex; }
-        .btn-small { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; }
+        
+        .mini-btn {
+            width: 30px; height: 30px; border-radius: 50%; border: 2px solid white;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+            cursor: pointer; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
 
-        .path-info { font-size: 11px; opacity: 0.6; word-break: break-all; margin-top: 10px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 5px; }
+        @keyframes wobble { 0% {transform:rotate(1deg)} 50% {transform:rotate(-1deg)} 100% {transform:rotate(1deg)} }
+
+        /* المدخلات */
+        input {
+            width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px;
+            border: 1px solid var(--border); background: rgba(255,255,255,0.05);
+            color: white; outline: none; font-size: 15px;
+        }
+        .main-btn {
+            width: 100%; padding: 15px; background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; margin-top: 15px;
+        }
     </style>
 </head>
 <body>
 
     <div class="top-controls">
-        <div class="control-btn" id="editToggle" onclick="toggleEditMode()"><i class="fas fa-pen"></i></div>
-        <div class="control-btn" onclick="toggleSidebar()"><i class="fas fa-plus"></i></div>
+        <div class="btn-circle" id="editToggle" onclick="toggleEdit()"><i class="fas fa-edit"></i></div>
+        <div class="btn-circle" onclick="toggleSide()"><i class="fas fa-plus"></i></div>
     </div>
 
     <div class="sidebar" id="sidebar">
-        <h2 style="margin-top:50px">الإعدادات</h2>
-        <div class="path-info" id="currentPath">لم يتم تحديد مسار للملف</div>
-        <button class="primary-btn" style="background: #555;" onclick="changeFilePath()">تغيير مسار التخزين</button>
-        
-        <hr style="opacity: 0.1; margin: 25px 0;">
-        
-        <h3>إضافة اختصار</h3>
-        <input type="text" id="siteName" placeholder="اسم الموقع">
-        <input type="url" id="siteUrl" placeholder="الرابط">
-        <button class="primary-btn" onclick="addShortcut()">إضافة وحفظ</button>
+        <h2 style="text-align:center">إضافة جديد</h2>
+        <input type="text" id="name" placeholder="اسم الموقع (مثال: يوتيوب)">
+        <input type="text" id="url" placeholder="الرابط (google.com)">
+        <button class="main-btn" onclick="add()">إضافة وحفظ في الكمبيوتر</button>
+        <p style="font-size: 11px; opacity: 0.5; margin-top: 30px; text-align: center;">يتم الحفظ تلقائياً في ملف data.json بجانب السكريبت</p>
     </div>
 
-    <div class="app-grid" id="appGrid"></div>
+    <div class="app-grid" id="grid"></div>
 
     <script>
         let shortcuts = [];
-        let isEditMode = false;
-        const SERVER = "http://localhost:8000";
-        let userPath = localStorage.getItem('raccourci_path');
+        let isEdit = false;
+        const API = "http://localhost:8000";
 
-        // جلب البيانات عند البداية
-        async function init() {
-            if (!userPath) {
-                userPath = prompt("يرجى إدخال المسار الكامل للملف (مثال: C:/links.json):");
-                if (userPath) localStorage.setItem('raccourci_path', userPath);
-            }
-            if (userPath) {
-                document.getElementById('currentPath').innerText = "المسار: " + userPath;
-                loadFromPC();
-            }
-        }
-
-        async function loadFromPC() {
+        // تحميل البيانات فوراً من البايثون
+        async function load() {
             try {
-                const res = await fetch(`${SERVER}/get_data?path=${encodeURIComponent(userPath)}`);
-                shortcuts = await res.json();
+                const r = await fetch(`${API}/get_data`);
+                shortcuts = await r.json();
                 render();
-            } catch (e) { console.error("الخادم غير متصل"); }
+            } catch(e) { alert("تأكد من تشغيل server.py أولاً!"); }
         }
 
-        async function syncWithPC() {
-            if (!userPath) return;
-            try {
-                await fetch(`${SERVER}/save_data`, {
-                    method: 'POST',
-                    body: JSON.stringify({ path: userPath, shortcuts: shortcuts }),
-                    headers: { 'Content-Type': 'application/json' }
-                });
-            } catch (e) { console.error("فشل الحفظ"); }
-        }
-
-        function render() {
-            const grid = document.getElementById('appGrid');
-            grid.innerHTML = '';
-            shortcuts.forEach((s, i) => {
-                const item = document.createElement('div');
-                item.className = 'app-item';
-                item.innerHTML = `
-                    <div class="action-btns">
-                        <div class="btn-small" style="background:#3a7bd5" onclick="move(${i},-1)"><i class="fas fa-arrow-right"></i></div>
-                        <div class="btn-small" style="background:var(--danger-color)" onclick="del(${i})"><i class="fas fa-times"></i></div>
-                        <div class="btn-small" style="background:#3a7bd5" onclick="move(${i},1)"><i class="fas fa-arrow-left"></i></div>
-                    </div>
-                    <a href="${isEditMode ? '#' : s.url}" ${isEditMode ? '' : 'target="_blank"'} style="text-decoration:none; color:white; display:flex; flex-direction:column; align-items:center;">
-                        <div class="app-icon-wrapper"><img src="https://www.google.com/s2/favicons?sz=128&domain=${s.url}"></div>
-                        <div style="font-size:13px">${s.name}</div>
-                    </a>`;
-                grid.appendChild(item);
+        async function sync() {
+            await fetch(`${API}/save_data`, {
+                method: 'POST',
+                body: JSON.stringify(shortcuts)
             });
         }
 
-        function addShortcut() {
-            const name = document.getElementById('siteName').value;
-            let url = document.getElementById('siteUrl').value;
-            if(!name || !url) return;
-            url = url.startsWith('http') ? url : 'https://' + url;
-            shortcuts.push({ name, url });
-            render(); syncWithPC();
-            document.getElementById('siteName').value = '';
-            document.getElementById('siteUrl').value = '';
+        function render() {
+            const g = document.getElementById('grid');
+            g.innerHTML = '';
+            shortcuts.forEach((s, i) => {
+                const div = document.createElement('div');
+                div.className = 'app-item';
+                div.innerHTML = `
+                    <div class="action-btns">
+                        <div class="mini-btn" style="background:#3a7bd5" onclick="move(${i},-1)"><i class="fas fa-chevron-right"></i></div>
+                        <div class="mini-btn" style="background:#ff4b2b" onclick="del(${i})"><i class="fas fa-trash"></i></div>
+                        <div class="mini-btn" style="background:#3a7bd5" onclick="move(${i},1)"><i class="fas fa-chevron-left"></i></div>
+                    </div>
+                    <a href="${isEdit ? '#' : s.url}" ${isEdit ? '' : 'target="_blank"'} style="text-decoration:none; color:white; text-align:center;">
+                        <div class="icon-box"><img src="https://www.google.com/s2/favicons?sz=128&domain=${s.url}"></div>
+                        <div style="font-weight:500">${s.name}</div>
+                    </a>`;
+                g.appendChild(div);
+            });
         }
 
-        async function del(i) { shortcuts.splice(i, 1); render(); await syncWithPC(); }
-        async function move(i, dir) {
-            if(i+dir >= 0 && i+dir < shortcuts.length) {
-                [shortcuts[i], shortcuts[i+dir]] = [shortcuts[i+dir], shortcuts[i]];
-                render(); await syncWithPC();
+        function add() {
+            const n = document.getElementById('name').value;
+            let u = document.getElementById('url').value;
+            if(!n || !u) return;
+            u = u.startsWith('http') ? u : 'https://' + u;
+            shortcuts.push({name: n, url: u});
+            document.getElementById('name').value = '';
+            document.getElementById('url').value = '';
+            render(); sync(); toggleSide();
+        }
+
+        function del(i) { shortcuts.splice(i, 1); render(); sync(); }
+        function move(i, d) {
+            if(i+d >= 0 && i+d < shortcuts.length) {
+                [shortcuts[i], shortcuts[i+d]] = [shortcuts[i+d], shortcuts[i]];
+                render(); sync();
             }
         }
 
-        function changeFilePath() {
-            const newPath = prompt("أدخل المسار الجديد:");
-            if (newPath) {
-                localStorage.setItem('raccourci_path', newPath);
-                location.reload();
-            }
-        }
-
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
-        function toggleEditMode() {
-            isEditMode = !isEditMode;
-            document.getElementById('editToggle').classList.toggle('active');
-            document.getElementById('appGrid').classList.toggle('edit-mode');
+        function toggleSide() { document.getElementById('sidebar').classList.toggle('active'); }
+        function toggleEdit() {
+            isEdit = !isEdit;
+            document.getElementById('editToggle').style.background = isEdit ? "#ff4b2b" : "";
+            document.getElementById('grid').classList.toggle('edit-mode');
             render();
         }
 
-        init();
+        load();
     </script>
 </body>
 </html>
