@@ -1,4 +1,4 @@
-/* الأكواد السابقة مضافة هنا مع تعديلات */
+/* الأكواد السابقة مضافة هنا مع تعديلات  */
 .divider { margin: 15px 0; color: #64748b; font-size: 14px; position: relative; }
 .divider::before, .divider::after {
     content: ""; position: absolute; top: 50%; width: 40%; height: 1px; background: #334155;
