@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raccourci Elite v3</title>
+    <title>Raccourci Elite - Final</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -68,6 +68,12 @@
             width: 100%; padding: 15px; background: linear-gradient(45deg, #00d2ff, #3a7bd5);
             border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px;
         }
+
+        .path-box {
+            margin-top: 40px; padding: 15px; background: rgba(0,0,0,0.3);
+            border-radius: 10px; border: 1px solid var(--border); font-size: 11px;
+            color: var(--accent); word-break: break-all; text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -81,9 +87,13 @@
         <h2 style="text-align:center;">إضافة اختصار</h2>
         <input type="text" id="name" placeholder="اسم الموقع">
         <input type="text" id="url" placeholder="الرابط (google.com)">
-        <input type="text" id="customIcon" placeholder="رابط الأيقونة أو مسارها (اختياري)">
+        <input type="text" id="customIcon" placeholder="رابط الأيقونة أو مسار صورة محلي">
         <button class="btn-main" onclick="add()">إضافة وحفظ</button>
-        <p style="font-size: 11px; opacity: 0.5; margin-top: 40px; text-align: center;">يتم الحفظ تلقائياً في data.json</p>
+        
+        <div class="path-box">
+            <strong>مسار التخزين الحالي:</strong><br>
+            <span id="currentPath">جاري جلب المسار...</span>
+        </div>
     </div>
 
     <div class="app-grid" id="grid"></div>
@@ -95,6 +105,12 @@
 
         async function load() {
             try {
+                // جلب مسار الملف لعرضه للمستخدم
+                const infoRes = await fetch(`${API}/get_info`);
+                const info = await infoRes.json();
+                document.getElementById('currentPath').innerText = info.path;
+
+                // جلب البيانات
                 const r = await fetch(`${API}/get_data`);
                 shortcuts = await r.json();
                 render();
@@ -114,7 +130,6 @@
             shortcuts.forEach((s, i) => {
                 const item = document.createElement('div');
                 item.className = 'app-item';
-                // إذا لم يوجد مسار مخصص، استخدم محرك جوجل للأيقونات
                 const iconSrc = s.icon || `https://www.google.com/s2/favicons?sz=128&domain=${s.url}`;
                 
                 item.innerHTML = `
