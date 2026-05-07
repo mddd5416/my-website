@@ -1,4 +1,4 @@
-// إعداد تسجيل دخول جوجل
+//  إعداد تسجيل دخول جوجل
 window.onload = function () {
     google.accounts.id.initialize({
         client_id: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com", // استبدل هذا الكود
