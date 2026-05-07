@@ -1,11 +1,11 @@
 import http.server, socketserver, json, os
 
 PORT = 8000
-# تحديد الملف في نفس مجلد السكريبت تلقائياً
+# المسار التلقائي هو نفس مجلد السكريبت
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, 'data.json')
 
-class SilentStorage(http.server.SimpleHTTPRequestHandler):
+class ProfessionalStorage(http.server.SimpleHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -14,7 +14,16 @@ class SilentStorage(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        if self.path == '/get_data':
+        if self.path == '/get_info':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            # نرسل المسار الكامل للمتصفح ليعرضه للمستخدم
+            info = {"path": DATA_FILE}
+            self.wfile.write(json.dumps(info).encode())
+            
+        elif self.path == '/get_data':
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
@@ -35,5 +44,5 @@ class SilentStorage(http.server.SimpleHTTPRequestHandler):
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
 
-print(f"الخادم يعمل بهدوء: http://localhost:{PORT}")
-socketserver.TCPServer(("", PORT), SilentStorage).serve_forever()
+print(f"الخادم يعمل على: http://localhost:{PORT}")
+socketserver.TCPServer(("", PORT), ProfessionalStorage).serve_forever()
