@@ -3,125 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raccourci - Direct File Storage</title>
+    <title>Raccourci - Professional Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             --accent-color: #00d2ff;
             --danger-color: #ff4b2b;
-            --success-color: #28a745;
             --card-bg: rgba(255, 255, 255, 0.08);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
         body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: var(--bg-gradient);
-            background-attachment: fixed;
-            color: white;
-            min-height: 100vh;
-            overflow: hidden;
+            margin: 0; font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-gradient); background-attachment: fixed;
+            color: white; min-height: 100vh; overflow-x: hidden;
         }
 
-        /* شاشة اختيار الملف البدائية */
-        #setupOverlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-gradient);
-            z-index: 2000; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; text-align: center;
-        }
-
-        .setup-card {
-            background: var(--card-bg);
-            padding: 40px; border-radius: 20px;
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            max-width: 400px;
-        }
-
-        .top-controls {
-            position: fixed; top: 20px; right: 20px;
-            display: flex; gap: 15px; z-index: 1000;
-        }
-
+        .top-controls { position: fixed; top: 20px; right: 20px; display: flex; gap: 15px; z-index: 1000; }
         .control-btn {
-            width: 50px; height: 50px;
-            background: var(--card-bg); border: 1px solid var(--glass-border);
+            width: 50px; height: 50px; background: var(--card-bg); border: 1px solid var(--glass-border);
             border-radius: 15px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.3s; color: white;
+            cursor: pointer; transition: 0.3s; color: white; backdrop-filter: blur(10px);
         }
-
         .control-btn:hover { background: var(--accent-color); transform: translateY(-3px); }
-        #editToggle.active { background: var(--danger-color); }
 
         .sidebar {
             position: fixed; top: 0; right: -350px; width: 320px; height: 100%;
             background: rgba(15, 12, 41, 0.95); backdrop-filter: blur(20px);
-            padding: 30px; transition: 0.5s cubic-bezier(0.77, 0, 0.175, 1);
-            z-index: 999; border-left: 1px solid var(--glass-border);
+            padding: 30px; transition: 0.5s; z-index: 999; border-left: 1px solid var(--glass-border);
         }
-
         .sidebar.active { right: 0; }
 
-        .app-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 40px; padding: 120px 40px; max-width: 1100px; margin: 0 auto;
-        }
-
+        .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 40px; padding: 120px 40px; max-width: 1100px; margin: 0 auto; }
         .app-item { position: relative; display: flex; flex-direction: column; align-items: center; transition: 0.4s; }
-
+        
         .app-icon-wrapper {
-            width: 85px; height: 85px; background: var(--card-bg);
-            border-radius: 22px; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 12px; backdrop-filter: blur(15px); border: 1px solid var(--glass-border);
-            overflow: hidden;
+            width: 85px; height: 85px; background: var(--card-bg); border-radius: 22px;
+            display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
+            backdrop-filter: blur(15px); border: 1px solid var(--glass-border); overflow: hidden;
         }
-
         .app-icon-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
-        .action-btns { position: absolute; top: -15px; display: none; gap: 6px; z-index: 10; }
-        .edit-mode .action-btns { display: flex; }
-
-        .btn-small {
-            width: 28px; height: 28px; border-radius: 50%; border: 2px solid #fff;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 12px; cursor: pointer; color: white; transition: 0.2s;
-        }
-
-        .btn-move { background: #3a7bd5; }
-        .btn-del { background: var(--danger-color); }
-        .edit-mode .app-item { animation: wobble 0.3s infinite; }
-
-        @keyframes wobble { 
-            0% { transform: rotate(1deg); } 
-            50% { transform: rotate(-1deg); } 
-            100% { transform: rotate(1deg); } 
+        .primary-btn {
+            width: 100%; padding: 15px; background: linear-gradient(to right, #00d2ff, #3a7bd5);
+            color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px;
         }
 
         input {
             width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px;
-            border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05);
-            color: white; outline: none; box-sizing: border-box;
+            border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: white; outline: none;
         }
 
-        .primary-btn {
-            width: 100%; padding: 15px; background: linear-gradient(to right, #00d2ff, #3a7bd5);
-            color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold;
-        }
+        .action-btns { position: absolute; top: -15px; display: none; gap: 6px; z-index: 10; }
+        .edit-mode .action-btns { display: flex; }
+        .btn-small { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; }
+
+        .path-info { font-size: 11px; opacity: 0.6; word-break: break-all; margin-top: 10px; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 5px; }
     </style>
 </head>
 <body>
-
-    <div id="setupOverlay">
-        <div class="setup-card">
-            <i class="fas fa-database" style="font-size: 50px; color: var(--accent-color); margin-bottom: 20px;"></i>
-            <h2>مرحباً محمد أمين</h2>
-            <p>يرجى اختيار ملف JSON على جهازك ليتم استخدامه كقاعدة بيانات للموقع.</p>
-            <button class="primary-btn" onclick="initFileStorage()">اختيار أو إنشاء ملف التخزين</button>
-        </div>
-    </div>
 
     <div class="top-controls">
         <div class="control-btn" id="editToggle" onclick="toggleEditMode()"><i class="fas fa-pen"></i></div>
@@ -129,131 +70,113 @@
     </div>
 
     <div class="sidebar" id="sidebar">
-        <h2 style="margin-top:50px">إضافة اختصار</h2>
+        <h2 style="margin-top:50px">الإعدادات</h2>
+        <div class="path-info" id="currentPath">لم يتم تحديد مسار للملف</div>
+        <button class="primary-btn" style="background: #555;" onclick="changeFilePath()">تغيير مسار التخزين</button>
+        
+        <hr style="opacity: 0.1; margin: 25px 0;">
+        
+        <h3>إضافة اختصار</h3>
         <input type="text" id="siteName" placeholder="اسم الموقع">
         <input type="url" id="siteUrl" placeholder="الرابط">
-        <input type="url" id="siteIconUrl" placeholder="رابط الأيقونة (اختياري)">
-        <button class="primary-btn" onclick="processAndAdd()">إضافة وتحديث الملف</button>
+        <button class="primary-btn" onclick="addShortcut()">إضافة وحفظ</button>
     </div>
 
     <div class="app-grid" id="appGrid"></div>
 
     <script>
         let shortcuts = [];
-        let fileHandle;
         let isEditMode = false;
-        const grid = document.getElementById('appGrid');
+        const SERVER = "http://localhost:8000";
+        let userPath = localStorage.getItem('raccourci_path');
 
-        // دالة اختيار الملف (قاعدة البيانات المحلية)
-        async function initFileStorage() {
+        // جلب البيانات عند البداية
+        async function init() {
+            if (!userPath) {
+                userPath = prompt("يرجى إدخال المسار الكامل للملف (مثال: C:/links.json):");
+                if (userPath) localStorage.setItem('raccourci_path', userPath);
+            }
+            if (userPath) {
+                document.getElementById('currentPath').innerText = "المسار: " + userPath;
+                loadFromPC();
+            }
+        }
+
+        async function loadFromPC() {
             try {
-                // طلب صلاحية الوصول لملف
-                [fileHandle] = await window.showOpenFilePicker({
-                    types: [{
-                        description: 'JSON Data File',
-                        accept: { 'application/json': ['.json'] }
-                    }],
-                    multiple: false
-                });
-
-                const file = await fileHandle.getFile();
-                const content = await file.text();
-                
-                // إذا كان الملف يحتوي على بيانات، قم بتحميلها
-                try {
-                    shortcuts = JSON.parse(content);
-                } catch(e) {
-                    shortcuts = []; // ملف جديد أو فارغ
-                }
-
-                document.getElementById('setupOverlay').style.display = 'none';
-                document.body.style.overflow = 'auto';
+                const res = await fetch(`${SERVER}/get_data?path=${encodeURIComponent(userPath)}`);
+                shortcuts = await res.json();
                 render();
-            } catch (err) {
-                console.log("تم إلغاء العملية أو المتصفح لا يدعم الميزة.");
-            }
+            } catch (e) { console.error("الخادم غير متصل"); }
         }
 
-        // دالة الحفظ التلقائي في الملف المختار
-        async function autoSaveToPC() {
-            if (!fileHandle) return;
+        async function syncWithPC() {
+            if (!userPath) return;
             try {
-                const writable = await fileHandle.createWritable();
-                await writable.write(JSON.stringify(shortcuts, null, 2));
-                await writable.close();
-                console.log("تم تحديث الملف على الكمبيوتر تلقائياً.");
-            } catch (err) {
-                console.error("فشل الحفظ. تأكد من إعطاء الصلاحية.");
-            }
-        }
-
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
-
-        function toggleEditMode() {
-            isEditMode = !isEditMode;
-            document.getElementById('editToggle').classList.toggle('active');
-            document.getElementById('editToggle').innerHTML = isEditMode ? '<i class="fas fa-check"></i>' : '<i class="fas fa-pen"></i>';
-            grid.classList.toggle('edit-mode');
-            render();
-        }
-
-        function moveLeft(index) {
-            if (index > 0) {
-                [shortcuts[index], shortcuts[index - 1]] = [shortcuts[index - 1], shortcuts[index]];
-                saveAndRender();
-            }
-        }
-
-        function moveRight(index) {
-            if (index < shortcuts.length - 1) {
-                [shortcuts[index], shortcuts[index + 1]] = [shortcuts[index + 1], shortcuts[index]];
-                saveAndRender();
-            }
-        }
-
-        function processAndAdd() {
-            const name = document.getElementById('siteName').value;
-            let url = document.getElementById('siteUrl').value;
-            const icon = document.getElementById('siteIconUrl').value;
-            if (!name || !url) return;
-            if (!url.startsWith('http')) url = 'https://' + url;
-            const iconFinal = icon || `https://www.google.com/s2/favicons?sz=128&domain=${url}`;
-            shortcuts.push({ id: Date.now(), name, url, icon: iconFinal });
-            saveAndRender();
-            toggleSidebar();
-            document.getElementById('siteName').value = '';
-            document.getElementById('siteUrl').value = '';
-            document.getElementById('siteIconUrl').value = '';
-        }
-
-        function deleteShortcut(index) {
-            shortcuts.splice(index, 1);
-            saveAndRender();
-        }
-
-        function saveAndRender() {
-            render();
-            autoSaveToPC(); // حفظ في الملف الحقيقي فوراً
+                await fetch(`${SERVER}/save_data`, {
+                    method: 'POST',
+                    body: JSON.stringify({ path: userPath, shortcuts: shortcuts }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            } catch (e) { console.error("فشل الحفظ"); }
         }
 
         function render() {
+            const grid = document.getElementById('appGrid');
             grid.innerHTML = '';
-            shortcuts.forEach((s, index) => {
+            shortcuts.forEach((s, i) => {
                 const item = document.createElement('div');
                 item.className = 'app-item';
                 item.innerHTML = `
                     <div class="action-btns">
-                        <div class="btn-small btn-move" onclick="moveLeft(${index})"><i class="fas fa-arrow-right"></i></div>
-                        <div class="btn-small btn-del" onclick="deleteShortcut(${index})"><i class="fas fa-times"></i></div>
-                        <div class="btn-small btn-move" onclick="moveRight(${index})"><i class="fas fa-arrow-left"></i></div>
+                        <div class="btn-small" style="background:#3a7bd5" onclick="move(${i},-1)"><i class="fas fa-arrow-right"></i></div>
+                        <div class="btn-small" style="background:var(--danger-color)" onclick="del(${i})"><i class="fas fa-times"></i></div>
+                        <div class="btn-small" style="background:#3a7bd5" onclick="move(${i},1)"><i class="fas fa-arrow-left"></i></div>
                     </div>
                     <a href="${isEditMode ? '#' : s.url}" ${isEditMode ? '' : 'target="_blank"'} style="text-decoration:none; color:white; display:flex; flex-direction:column; align-items:center;">
-                        <div class="app-icon-wrapper"><img src="${s.icon}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1243/1243966.png'"></div>
+                        <div class="app-icon-wrapper"><img src="https://www.google.com/s2/favicons?sz=128&domain=${s.url}"></div>
                         <div style="font-size:13px">${s.name}</div>
                     </a>`;
                 grid.appendChild(item);
             });
         }
+
+        function addShortcut() {
+            const name = document.getElementById('siteName').value;
+            let url = document.getElementById('siteUrl').value;
+            if(!name || !url) return;
+            url = url.startsWith('http') ? url : 'https://' + url;
+            shortcuts.push({ name, url });
+            render(); syncWithPC();
+            document.getElementById('siteName').value = '';
+            document.getElementById('siteUrl').value = '';
+        }
+
+        async function del(i) { shortcuts.splice(i, 1); render(); await syncWithPC(); }
+        async function move(i, dir) {
+            if(i+dir >= 0 && i+dir < shortcuts.length) {
+                [shortcuts[i], shortcuts[i+dir]] = [shortcuts[i+dir], shortcuts[i]];
+                render(); await syncWithPC();
+            }
+        }
+
+        function changeFilePath() {
+            const newPath = prompt("أدخل المسار الجديد:");
+            if (newPath) {
+                localStorage.setItem('raccourci_path', newPath);
+                location.reload();
+            }
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            document.getElementById('editToggle').classList.toggle('active');
+            document.getElementById('appGrid').classList.toggle('edit-mode');
+            render();
+        }
+
+        init();
     </script>
 </body>
 </html>
