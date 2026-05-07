@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raccourci Elite</title>
+    <title>Raccourci Elite v3</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -13,30 +13,27 @@
         }
 
         body {
-            margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; font-family: 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            background-attachment: fixed; color: white; min-height: 100vh; overflow-x: hidden;
+            background-attachment: fixed; color: white; min-height: 100vh;
         }
 
-        /* التحكم العلوي */
         .controls { position: fixed; top: 30px; right: 30px; display: flex; gap: 15px; z-index: 1000; }
         .btn-ui {
             width: 55px; height: 55px; background: var(--glass); border: 1px solid var(--border);
             border-radius: 18px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.3s; backdrop-filter: blur(15px); color: white; font-size: 20px;
+            cursor: pointer; transition: 0.3s; backdrop-filter: blur(15px); color: white;
         }
-        .btn-ui:hover { background: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .btn-ui:hover { background: var(--accent); transform: translateY(-3px); }
 
-        /* القائمة الجانبية */
         .sidebar {
             position: fixed; top: 0; right: -360px; width: 320px; height: 100%;
-            background: rgba(10, 10, 25, 0.92); backdrop-filter: blur(30px);
+            background: rgba(10, 10, 25, 0.95); backdrop-filter: blur(30px);
             padding: 50px 25px; transition: 0.5s cubic-bezier(0.77, 0, 0.175, 1);
             z-index: 999; border-left: 1px solid var(--border);
         }
         .sidebar.active { right: 0; }
 
-        /* واجهة الشبكة */
         .app-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 50px; padding: 140px 60px; max-width: 1200px; margin: 0 auto;
@@ -46,55 +43,47 @@
         .icon-wrapper {
             width: 95px; height: 95px; background: var(--glass); border-radius: 26px;
             border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
-            margin-bottom: 15px; overflow: hidden; backdrop-filter: blur(10px); transition: 0.3s;
+            margin-bottom: 15px; overflow: hidden; backdrop-filter: blur(10px);
         }
         .icon-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        .app-item:hover .icon-wrapper { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 0 20px rgba(0, 210, 255, 0.2); }
 
-        /* الأنيميشن والتعديل */
         .edit-mode .app-item { animation: wobble 0.3s infinite ease-in-out; }
         .actions { position: absolute; top: -12px; display: none; gap: 8px; z-index: 50; }
         .edit-mode .actions { display: flex; }
         
         .btn-sm {
-            width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff;
+            width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff;
             display: flex; align-items: center; justify-content: center; font-size: 12px;
-            cursor: pointer; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            cursor: pointer; color: white;
         }
 
         @keyframes wobble { 0% {transform:rotate(1.5deg)} 50% {transform:rotate(-1.5deg)} 100% {transform:rotate(1.5deg)} }
 
-        /* مدخلات أنيقة */
         input {
-            width: 100%; padding: 16px; margin: 12px 0; border-radius: 14px;
-            border: 1px solid var(--border); background: rgba(255,255,255,0.06);
-            color: white; outline: none; font-size: 15px; box-sizing: border-box;
+            width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px;
+            border: 1px solid var(--border); background: rgba(255,255,255,0.05);
+            color: white; outline: none; font-size: 14px; box-sizing: border-box;
         }
         .btn-main {
-            width: 100%; padding: 16px; background: linear-gradient(45deg, #00d2ff, #3a7bd5);
-            border: none; border-radius: 14px; color: white; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.3s;
+            width: 100%; padding: 15px; background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px;
         }
-        .btn-main:hover { opacity: 0.9; transform: scale(1.02); }
-
-        .path-label { font-size: 11px; opacity: 0.5; text-align: center; margin-top: 20px; line-height: 1.6; }
     </style>
 </head>
 <body>
 
     <div class="controls">
-        <div class="btn-ui" id="editToggle" onclick="toggleEdit()"><i class="fas fa-edit"></i></div>
+        <div class="btn-ui" id="editToggle" onclick="toggleEdit()"><i class="fas fa-pen"></i></div>
         <div class="btn-ui" onclick="toggleSide()"><i class="fas fa-plus"></i></div>
     </div>
 
     <div class="sidebar" id="sidebar">
-        <h2 style="text-align:center; margin-bottom: 30px;">إضافة اختصار</h2>
-        <input type="text" id="name" placeholder="اسم التطبيق">
-        <input type="text" id="url" placeholder="رابط الموقع (مثال: google.com)">
-        <button class="btn-main" onclick="addShortcut()">إضافة وحفظ</button>
-        
-        <hr style="opacity: 0.1; margin: 40px 0;">
-        <button class="btn-main" style="background: #444;" onclick="setFilePath()">تغيير مكان التخزين</button>
-        <div class="path-label" id="pathDisplay">لم يتم تحديد مسار</div>
+        <h2 style="text-align:center;">إضافة اختصار</h2>
+        <input type="text" id="name" placeholder="اسم الموقع">
+        <input type="text" id="url" placeholder="الرابط (google.com)">
+        <input type="text" id="customIcon" placeholder="رابط الأيقونة أو مسارها (اختياري)">
+        <button class="btn-main" onclick="add()">إضافة وحفظ</button>
+        <p style="font-size: 11px; opacity: 0.5; margin-top: 40px; text-align: center;">يتم الحفظ تلقائياً في data.json</p>
     </div>
 
     <div class="app-grid" id="grid"></div>
@@ -102,38 +91,20 @@
     <script>
         let shortcuts = [];
         let isEdit = false;
-        let config = {
-            path: localStorage.getItem('raccourci_file_path') || ''
-        };
-        const SERVER = "http://localhost:8000";
+        const API = "http://localhost:8000";
 
-        async function init() {
-            if (!config.path) {
-                const userPath = prompt("أدخل المسار الكامل لحفظ بياناتك (مثال: C:/data.json):");
-                if (userPath) {
-                    config.path = userPath;
-                    localStorage.setItem('raccourci_file_path', userPath);
-                }
-            }
-            document.getElementById('pathDisplay').innerText = "المسار الحالي: " + (config.path || "غير محدد");
-            loadData();
-        }
-
-        async function loadData() {
-            if (!config.path) return;
+        async function load() {
             try {
-                const r = await fetch(`${SERVER}/get_data?path=${encodeURIComponent(config.path)}`);
+                const r = await fetch(`${API}/get_data`);
                 shortcuts = await r.json();
                 render();
-            } catch(e) { console.error("تأكد من تشغيل البايثون"); }
+            } catch(e) { console.error("الخادم غير متصل"); }
         }
 
         async function sync() {
-            if (!config.path) return;
-            await fetch(`${SERVER}/save_data`, {
+            await fetch(`${API}/save_data`, {
                 method: 'POST',
-                body: JSON.stringify({ path: config.path, content: shortcuts }),
-                headers: { 'Content-Type': 'application/json' }
+                body: JSON.stringify(shortcuts)
             });
         }
 
@@ -143,6 +114,9 @@
             shortcuts.forEach((s, i) => {
                 const item = document.createElement('div');
                 item.className = 'app-item';
+                // إذا لم يوجد مسار مخصص، استخدم محرك جوجل للأيقونات
+                const iconSrc = s.icon || `https://www.google.com/s2/favicons?sz=128&domain=${s.url}`;
+                
                 item.innerHTML = `
                     <div class="actions">
                         <div class="btn-sm" style="background:#3a7bd5" onclick="move(${i},-1)"><i class="fas fa-chevron-right"></i></div>
@@ -150,22 +124,24 @@
                         <div class="btn-sm" style="background:#3a7bd5" onclick="move(${i},1)"><i class="fas fa-chevron-left"></i></div>
                     </div>
                     <a href="${isEdit ? '#' : s.url}" ${isEdit ? '' : 'target="_blank"'} style="text-decoration:none; color:white; text-align:center;">
-                        <div class="icon-wrapper"><img src="https://www.google.com/s2/favicons?sz=128&domain=${s.url}"></div>
-                        <div style="font-weight:500; font-size:14px;">${s.name}</div>
+                        <div class="icon-wrapper"><img src="${iconSrc}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1243/1243966.png'"></div>
+                        <div style="font-weight:500;">${s.name}</div>
                     </a>`;
                 g.appendChild(item);
             });
         }
 
-        function addShortcut() {
+        function add() {
             const n = document.getElementById('name').value;
             let u = document.getElementById('url').value;
+            const ic = document.getElementById('customIcon').value;
             if(!n || !u) return;
             u = u.startsWith('http') ? u : 'https://' + u;
-            shortcuts.push({name: n, url: u});
+            shortcuts.push({name: n, url: u, icon: ic});
             render(); sync(); toggleSide();
             document.getElementById('name').value = '';
             document.getElementById('url').value = '';
+            document.getElementById('customIcon').value = '';
         }
 
         function del(i) { shortcuts.splice(i, 1); render(); sync(); }
@@ -173,15 +149,6 @@
             if(i+d >= 0 && i+d < shortcuts.length) {
                 [shortcuts[i], shortcuts[i+d]] = [shortcuts[i+d], shortcuts[i]];
                 render(); sync();
-            }
-        }
-
-        function setFilePath() {
-            const newPath = prompt("أدخل المسار الجديد لملف JSON:");
-            if (newPath) {
-                config.path = newPath;
-                localStorage.setItem('raccourci_file_path', newPath);
-                location.reload();
             }
         }
 
@@ -193,7 +160,7 @@
             render();
         }
 
-        init();
+        load();
     </script>
 </body>
 </html>
