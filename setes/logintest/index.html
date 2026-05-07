@@ -3,45 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة التواصل الاجتماعي</title>
+    <title>منصة التواصل الاجتماعي | فضائي الخاص</title>
     <link rel="stylesheet" href="style.css">
-    <!-- مكتبة جوجل -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
     <div class="container">
-        <!-- نموذج الدخول والإنشاء  -->
         <div id="authContainer">
             <div class="form-box" id="loginForm">
-                <h2>تسجيل الدخول</h2>
-                <div id="googleBtn"></div> <!-- زر جوجل سيظهر هنا -->
-                <div class="divider">أو</div>
-                <input type="text" id="loginUser" placeholder="اسم المستخدم">
-                <input type="password" id="loginPass" placeholder="كلمة المرور">
-                <button onclick="login()">دخول</button>
-                <p>ليس لديك حساب؟ <span class="toggle-link" onclick="toggleForm()">إنشاء حساب</span></p>
+                <h2>مرحباً بك</h2>
+                <p>ابدأ رحلتك في عالمنا الخاص</p>
+                
+                <div id="googleBtn"></div>
+                
+                <div class="divider">أو عبر الحساب التقليدي</div>
+                
+                <div class="input-group">
+                    <input type="text" id="loginUser" placeholder="اسم المستخدم">
+                    <input type="password" id="loginPass" placeholder="كلمة المرور">
+                </div>
+                <button class="main-btn" onclick="login()">دخول</button>
+                <p class="footer-text">ليس لديك حساب؟ <span class="toggle-link" onclick="toggleForm()">إنشاء حساب</span></p>
             </div>
 
             <div class="form-box hidden" id="signupForm">
-                <h2>إنشاء حساب</h2>
-                <input type="text" id="regUser" placeholder="اسم المستخدم">
-                <input type="password" id="regPass" placeholder="كلمة المرور">
-                <button onclick="register()">تسجيل</button>
-                <p>لديك حساب؟ <span class="toggle-link" onclick="toggleForm()">دخول</span></p>
+                <h2>إنشاء حساب جديد</h2>
+                <div class="input-group">
+                    <input type="text" id="regUser" placeholder="اسم المستخدم الجديد">
+                    <input type="email" id="regEmail" placeholder="البريد الإلكتروني">
+                    <input type="password" id="regPass" placeholder="كلمة المرور">
+                </div>
+                <button class="main-btn" onclick="register()">تسجيل الحساب</button>
+                <p class="footer-text">لديك حساب بالفعل؟ <span class="toggle-link" onclick="toggleForm()">تسجيل الدخول</span></p>
             </div>
         </div>
 
-        <!-- الفضاء الخاص (بعد تسجيل الدخول) -->
         <div id="userSpace" class="form-box hidden">
-            <div class="profile-header">
-                <img id="userImg" src="https://via.placeholder.com/80" alt="صورة الشخصية">
-                <h2 id="welcomeMsg">مرحباً بك!</h2>
+            <div class="profile-card">
+                <div class="img-wrapper">
+                    <img id="userImg" src="https://via.placeholder.com/100" alt="صورة الشخصية">
+                    <div class="online-dot"></div>
+                </div>
+                <h3 id="welcomeMsg">أهلاً بك</h3>
+                <p id="userEmail" style="color: #94a3b8; font-size: 0.8rem;"></p>
             </div>
-            <div class="feed-mock">
-                <textarea placeholder="بماذا تفكر؟"></textarea>
-                <button class="post-btn">نشر</button>
+            
+            <div class="feed-section">
+                <textarea id="postText" placeholder="بماذا تفكر يا مبرمج؟"></textarea>
+                <button class="post-btn" onclick="addPost()">نشر في فضائي</button>
             </div>
+
+            <div id="postsContainer">
+                </div>
+            
             <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
         </div>
     </div>
