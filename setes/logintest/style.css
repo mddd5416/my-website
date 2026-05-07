@@ -1,18 +1,89 @@
-/* الأكواد السابقة مضافة هنا مع تعديلات  */
-.divider { margin: 15px 0; color: #64748b; font-size: 14px; position: relative; }
-.divider::before, .divider::after {
-    content: ""; position: absolute; top: 50%; width: 40%; height: 1px; background: #334155;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-.divider::before { left: 0; } .divider::after { right: 0; }
 
-#userSpace { max-width: 500px; text-align: right; }
-.profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
-#userImg { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #38bdf8; }
-
-.feed-mock textarea {
-    width: 100%; height: 80px; background: #0f172a; border: 1px solid #334155;
-    border-radius: 8px; color: white; padding: 10px; resize: none;
+body {
+    background: #0f172a;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    overflow-x: hidden;
 }
-.post-btn { background: #10b981; margin-top: 10px; }
-.logout-btn { background: #ef4444; margin-top: 20px; }
-#googleBtn { display: flex; justify-content: center; margin-bottom: 10px; }
+
+.container { width: 100%; max-width: 480px; padding: 20px; }
+
+.form-box {
+    background: #1e293b;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.05);
+    text-align: center;
+    transition: 0.4s ease;
+}
+
+.hidden { display: none; }
+
+h2 { margin-bottom: 8px; color: #38bdf8; }
+
+.divider { margin: 20px 0; color: #64748b; font-size: 0.85rem; position: relative; }
+
+input {
+    width: 100%;
+    padding: 14px;
+    margin: 8px 0;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: white;
+    outline: none;
+    transition: 0.3s;
+}
+
+input:focus { border-color: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }
+
+.main-btn, .post-btn {
+    width: 100%;
+    padding: 14px;
+    background: #38bdf8;
+    color: #0f172a;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.main-btn:hover { background: #0ea5e9; transform: translateY(-2px); }
+
+/* تنسيق الفضاء الخاص */
+.img-wrapper { position: relative; width: 100px; margin: 0 auto 15px; }
+#userImg { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #38bdf8; object-fit: cover; }
+.online-dot { width: 15px; height: 15px; background: #10b981; border: 3px solid #1e293b; border-radius: 50%; position: absolute; bottom: 5px; right: 5px; }
+
+.feed-section textarea {
+    width: 100%; height: 100px; border-radius: 12px; background: #334155;
+    color: white; padding: 15px; border: none; resize: none; margin: 20px 0 10px;
+}
+
+.logout-btn {
+    background: transparent;
+    color: #ef4444;
+    border: 2px solid #ef4444;
+    padding: 10px 25px;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 30px;
+    font-weight: bold;
+}
+
+.logout-btn:hover { background: #ef4444; color: white; }
+
+.toggle-link { color: #38bdf8; cursor: pointer; font-weight: bold; }
+#googleBtn { display: flex; justify-content: center; margin-top: 15px; }
