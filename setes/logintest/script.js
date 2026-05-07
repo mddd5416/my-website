@@ -1,67 +1,74 @@
-//  إعداد تسجيل دخول جوجل
+// تشغيل نظام جوجل عند تحميل الصفحة
 window.onload = function () {
     google.accounts.id.initialize({
-        client_id: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com", // استبدل هذا الكود
+        client_id: "890705487477-a1iigietqjtfdtkt8l3b70r8g78rres8.apps.googleusercontent.com",
         callback: handleCredentialResponse
     });
     google.accounts.id.renderButton(
         document.getElementById("googleBtn"),
-        { theme: "outline", size: "large", width: "100%" }
+        { theme: "filled_blue", size: "large", width: "100%", text: "continue_with" }
     );
 };
 
-// معالجة الرد من جوجل
+// معالجة البيانات القادمة من جوجل
 function handleCredentialResponse(response) {
-    const responsePayload = parseJwt(response.credential);
-    const userData = {
-        user: responsePayload.name,
-        img: responsePayload.picture
-    };
-    showUserSpace(userData);
+    const userObject = parseJwt(response.credential);
+    console.log("تم تسجيل الدخول بنجاح عبر جوجل");
+    
+    showUserSpace({
+        name: userObject.name,
+        email: userObject.email,
+        img: userObject.picture
+    });
 }
 
-function parseJwt (token) {
+// دالة فك تشفير بيانات جوجل
+function parseJwt(token) {
     var base64Url = token.split('.')[1];
     var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     return JSON.parse(window.atob(base64));
 }
 
-// التبديل للفضاء الخاص
-function showUserSpace(data) {
+// عرض الفضاء الخاص وإخفاء شاشة الدخول
+function showUserSpace(userData) {
     document.getElementById('authContainer').classList.add('hidden');
     document.getElementById('userSpace').classList.remove('hidden');
-    document.getElementById('welcomeMsg').innerText = "مرحباً، " + data.user;
-    if(data.img) document.getElementById('userImg').src = data.img;
-}
-
-function logout() {
-    location.reload(); // أبسط طريقة لتسجيل الخروج في المواقع الثابتة
-}
-
-// وظائف تسجيل الدخول العادي (نفس السابقة مع استدعاء showUserSpace)
-function login() {
-    const user = document.getElementById('loginUser').value;
-    const pass = document.getElementById('loginPass').value;
-    const stored = JSON.parse(localStorage.getItem('userData'));
-
-    if (stored && user === stored.user && pass === stored.pass) {
-        showUserSpace({ user: user });
-    } else {
-        alert("خطأ في البيانات");
+    
+    document.getElementById('welcomeMsg').innerText = "مرحباً بك، " + userData.name;
+    document.getElementById('userEmail').innerText = userData.email || "";
+    if (userData.img) {
+        document.getElementById('userImg').src = userData.img;
     }
 }
 
+// التبديل بين نماذج الدخول والإنشاء
 function toggleForm() {
     document.getElementById('loginForm').classList.toggle('hidden');
     document.getElementById('signupForm').classList.toggle('hidden');
 }
 
-function register() {
-    const user = document.getElementById('regUser').value;
-    const pass = document.getElementById('regPass').value;
-    if(user && pass) {
-        localStorage.setItem('userData', JSON.stringify({user, pass}));
-        alert("تم! سجل دخولك الآن");
-        toggleForm();
+// تسجيل الخروج (إعادة تحميل الصفحة ببساطة)
+function logout() {
+    if(confirm("هل تريد تسجيل الخروج؟")) {
+        location.reload();
+    }
+}
+
+// نظام الدخول التقليدي (للتجربة المحلية)
+function login() {
+    const user = document.getElementById('loginUser').value;
+    if(user) {
+        showUserSpace({ name: user, email: "حساب محلي", img: "" });
+    } else {
+        alert("يرجى إدخال اسم المستخدم");
+    }
+}
+
+// ميزة تجريبية لنشر منشور
+function addPost() {
+    const text = document.getElementById('postText').value;
+    if(text) {
+        alert("تم النشر في فضائك الخاص بنجاح!");
+        document.getElementById('postText').value = "";
     }
 }
