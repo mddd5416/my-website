@@ -1,39 +1,166 @@
-import http.server, socketserver, json, os
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raccourci Elite v3</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --accent: #00d2ff;
+            --glass: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.12);
+        }
 
-PORT = 8000
-# تحديد الملف في نفس مجلد السكريبت تلقائياً
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(BASE_DIR, 'data.json')
+        body {
+            margin: 0; font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background-attachment: fixed; color: white; min-height: 100vh;
+        }
 
-class SilentStorage(http.server.SimpleHTTPRequestHandler):
-    def do_OPTIONS(self):
-        self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        self.end_headers()
+        .controls { position: fixed; top: 30px; right: 30px; display: flex; gap: 15px; z-index: 1000; }
+        .btn-ui {
+            width: 55px; height: 55px; background: var(--glass); border: 1px solid var(--border);
+            border-radius: 18px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.3s; backdrop-filter: blur(15px); color: white;
+        }
+        .btn-ui:hover { background: var(--accent); transform: translateY(-3px); }
 
-    def do_GET(self):
-        if self.path == '/get_data':
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            if os.path.exists(DATA_FILE):
-                with open(DATA_FILE, 'r', encoding='utf-8') as f:
-                    self.wfile.write(f.read().encode('utf-8'))
-            else: self.wfile.write(b"[]")
-        else: super().do_GET()
+        .sidebar {
+            position: fixed; top: 0; right: -360px; width: 320px; height: 100%;
+            background: rgba(10, 10, 25, 0.95); backdrop-filter: blur(30px);
+            padding: 50px 25px; transition: 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+            z-index: 999; border-left: 1px solid var(--border);
+        }
+        .sidebar.active { right: 0; }
 
-    def do_POST(self):
-        if self.path == '/save_data':
-            length = int(self.headers['Content-Length'])
-            data = self.rfile.read(length).decode('utf-8')
-            with open(DATA_FILE, 'w', encoding='utf-8') as f:
-                f.write(data)
-            self.send_response(200)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
+        .app-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 50px; padding: 140px 60px; max-width: 1200px; margin: 0 auto;
+        }
 
-print(f"الخادم يعمل بهدوء: http://localhost:{PORT}")
-socketserver.TCPServer(("", PORT), SilentStorage).serve_forever()
+        .app-item { position: relative; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
+        .icon-wrapper {
+            width: 95px; height: 95px; background: var(--glass); border-radius: 26px;
+            border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+            margin-bottom: 15px; overflow: hidden; backdrop-filter: blur(10px);
+        }
+        .icon-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+        .edit-mode .app-item { animation: wobble 0.3s infinite ease-in-out; }
+        .actions { position: absolute; top: -12px; display: none; gap: 8px; z-index: 50; }
+        .edit-mode .actions { display: flex; }
+        
+        .btn-sm {
+            width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+            cursor: pointer; color: white;
+        }
+
+        @keyframes wobble { 0% {transform:rotate(1.5deg)} 50% {transform:rotate(-1.5deg)} 100% {transform:rotate(1.5deg)} }
+
+        input {
+            width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px;
+            border: 1px solid var(--border); background: rgba(255,255,255,0.05);
+            color: white; outline: none; font-size: 14px; box-sizing: border-box;
+        }
+        .btn-main {
+            width: 100%; padding: 15px; background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+            border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <div class="btn-ui" id="editToggle" onclick="toggleEdit()"><i class="fas fa-pen"></i></div>
+        <div class="btn-ui" onclick="toggleSide()"><i class="fas fa-plus"></i></div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <h2 style="text-align:center;">إضافة اختصار</h2>
+        <input type="text" id="name" placeholder="اسم الموقع">
+        <input type="text" id="url" placeholder="الرابط (google.com)">
+        <input type="text" id="customIcon" placeholder="رابط الأيقونة أو مسارها (اختياري)">
+        <button class="btn-main" onclick="add()">إضافة وحفظ</button>
+        <p style="font-size: 11px; opacity: 0.5; margin-top: 40px; text-align: center;">يتم الحفظ تلقائياً في data.json</p>
+    </div>
+
+    <div class="app-grid" id="grid"></div>
+
+    <script>
+        let shortcuts = [];
+        let isEdit = false;
+        const API = "http://localhost:8000";
+
+        async function load() {
+            try {
+                const r = await fetch(`${API}/get_data`);
+                shortcuts = await r.json();
+                render();
+            } catch(e) { console.error("الخادم غير متصل"); }
+        }
+
+        async function sync() {
+            await fetch(`${API}/save_data`, {
+                method: 'POST',
+                body: JSON.stringify(shortcuts)
+            });
+        }
+
+        function render() {
+            const g = document.getElementById('grid');
+            g.innerHTML = '';
+            shortcuts.forEach((s, i) => {
+                const item = document.createElement('div');
+                item.className = 'app-item';
+                // إذا لم يوجد مسار مخصص، استخدم محرك جوجل للأيقونات
+                const iconSrc = s.icon || `https://www.google.com/s2/favicons?sz=128&domain=${s.url}`;
+                
+                item.innerHTML = `
+                    <div class="actions">
+                        <div class="btn-sm" style="background:#3a7bd5" onclick="move(${i},-1)"><i class="fas fa-chevron-right"></i></div>
+                        <div class="btn-sm" style="background:#ff4b2b" onclick="del(${i})"><i class="fas fa-trash"></i></div>
+                        <div class="btn-sm" style="background:#3a7bd5" onclick="move(${i},1)"><i class="fas fa-chevron-left"></i></div>
+                    </div>
+                    <a href="${isEdit ? '#' : s.url}" ${isEdit ? '' : 'target="_blank"'} style="text-decoration:none; color:white; text-align:center;">
+                        <div class="icon-wrapper"><img src="${iconSrc}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1243/1243966.png'"></div>
+                        <div style="font-weight:500;">${s.name}</div>
+                    </a>`;
+                g.appendChild(item);
+            });
+        }
+
+        function add() {
+            const n = document.getElementById('name').value;
+            let u = document.getElementById('url').value;
+            const ic = document.getElementById('customIcon').value;
+            if(!n || !u) return;
+            u = u.startsWith('http') ? u : 'https://' + u;
+            shortcuts.push({name: n, url: u, icon: ic});
+            render(); sync(); toggleSide();
+            document.getElementById('name').value = '';
+            document.getElementById('url').value = '';
+            document.getElementById('customIcon').value = '';
+        }
+
+        function del(i) { shortcuts.splice(i, 1); render(); sync(); }
+        function move(i, d) {
+            if(i+d >= 0 && i+d < shortcuts.length) {
+                [shortcuts[i], shortcuts[i+d]] = [shortcuts[i+d], shortcuts[i]];
+                render(); sync();
+            }
+        }
+
+        function toggleSide() { document.getElementById('sidebar').classList.toggle('active'); }
+        function toggleEdit() {
+            isEdit = !isEdit;
+            document.getElementById('editToggle').style.background = isEdit ? "#ff4b2b" : "";
+            document.getElementById('grid').classList.toggle('edit-mode');
+            render();
+        }
+
+        load();
+    </script>
+</body>
+</html>
