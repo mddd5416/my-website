@@ -2,112 +2,292 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> محمد أمين</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Google Admin Console | محمد أمين</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0a0a12; --card: #11111d; --accent: #3699ff; --text: #ffffff; --border: #1f1f30; }
-        [data-theme="light"] { --bg: #f8f9fa; --card: #ffffff; --accent: #0061f2; --text: #1a1a1b; --border: #d1d9e6; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); direction: rtl; }
+        :root {
+            --google-blue: #1a73e8;
+            --google-red: #ea4335;
+            --google-gray: #5f6368;
+            --bg-color: #ffffff;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --text-main: #202124;
+            --border-color: #dadce0;
+            --nav-hover: #f1f3f4;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #202124;
+            --sidebar-bg: #202124;
+            --card-bg: #292a2d;
+            --text-main: #e8eaed;
+            --border-color: #3c4043;
+            --nav-hover: #3c4043;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Google Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden; /* إزالة السكرول المزعج من الجسم */
+            height: 100vh;
+        }
+
+        /* الهيكل الأساسي */
+        #main-app {
+            display: none;
+            grid-template-columns: 280px 1fr;
+            height: 100vh;
+        }
+
+        /* السايد بار بستايل جوجل */
+        .sidebar {
+            background: var(--sidebar-bg);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .profile-card {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .avatar-container {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .avatar-container img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--google-blue);
+        }
+
+        .avatar-edit-hint {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--google-blue);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            margin: 4px 8px;
+            border-radius: 0 25px 25px 0; /* شكل جوجل الشهير */
+            border: none;
+            background: transparent;
+            color: var(--google-gray);
+            cursor: pointer;
+            text-align: right;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: 0.2s;
+        }
+
+        .nav-item.active {
+            background-color: #e8f0fe;
+            color: var(--google-blue);
+        }
+
+        /* مساحة العمل */
+        .workspace {
+            padding: 30px;
+            overflow-y: auto; /* السكرول فقط هنا داخل المحتوى */
+            background: var(--bg-color);
+        }
+
+        .panel { display: none; max-width: 900px; margin: 0 auto; }
+        .panel.active { display: block; }
+
+        .google-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: none;
+            margin-bottom: 24px;
+        }
+
+        h3 { margin-top: 0; font-weight: 500; font-size: 18px; }
+
+        /* مدخلات جوجل المريحة */
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 8px 0 20px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: transparent;
+            color: var(--text-main);
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        input:focus { border: 2px solid var(--google-blue); outline: none; }
+
+        .btn-google {
+            background-color: var(--google-blue);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+        }
+
+        .btn-google:hover { box-shadow: 0 1px 3px rgba(60,64,67,0.3); }
 
         /* شاشة الدخول */
-        #auth-layer { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .auth-box { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid var(--border); width: 320px; text-align: center; }
+        #auth-layer {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-        /* الهيكل الرئيسي */
-        #main-app { display: none; grid-template-columns: 260px 1fr; min-height: 100vh; }
-        .sidebar { background: var(--card); border-left: 1px solid var(--border); padding: 25px; position: sticky; top: 0; height: 100vh; box-sizing: border-box; }
-        .sidebar-head { text-align: center; margin-bottom: 40px; }
-        .sidebar-head img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; }
-
-        .nav-link { display: block; width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 12px; background: transparent; color: #a2a3b7; cursor: pointer; text-align: right; transition: 0.3s; }
-        .nav-link.active, .nav-link:hover { background: var(--accent); color: white; }
-
-        .workspace { padding: 40px; overflow-y: auto; }
-        .panel { display: none; }
-        .panel.active { display: block; animation: fadeIn 0.4s ease; }
-
-        .card { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 20px; }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 10px; background: #07070c; color: #fff; box-sizing: border-box; outline: none; }
-        .btn-kick { background: var(--accent); color: #fff; border: none; padding: 15px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; }
-
-        .preview-grid { display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0; }
-        .thumb { position: relative; width: 85px; height: 85px; }
-        .thumb img { width: 100%; height: 100%; border-radius: 10px; object-fit: cover; border: 1px solid var(--accent); }
-        .del-x { position: absolute; top: -5px; right: -5px; background: #f64e60; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* الصور والمعاينة */
+        .preview-box { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .img-thumb {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+        .img-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+        .remove-btn {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            background: var(--google-red);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
     <div id="auth-layer">
-        <div class="auth-box">
-            <h2 style="color:var(--accent)">ROOT ACCESS</h2>
-            <input type="text" id="login-u" placeholder="اسم المستخدم">
+        <div style="width: 350px; text-align: center;">
+            <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" width="120" alt="Google">
+            <h2 style="font-weight: 400; margin-top: 20px;">تسجيل الدخول</h2>
+            <p style="color: var(--google-gray); margin-bottom: 30px;">استخدم حساب المشرف الخاص بك</p>
+            <input type="text" id="login-u" placeholder="البريد الإلكتروني أو الهاتف">
             <input type="password" id="login-p" placeholder="كلمة المرور">
-            <button class="btn-kick" id="btn-login">دخول</button>
+            <div style="text-align: left; margin-top: 20px;">
+                <button class="btn-google" id="btn-login">التالي</button>
+            </div>
         </div>
     </div>
 
     <div id="main-app">
         <aside class="sidebar">
-            <div class="sidebar-head">
-                <img id="admin-avatar" src="https://via.placeholder.com/80">
-                <h3 id="admin-display-name">محمد أمين</h3>
+            <div class="profile-card">
+                <div class="avatar-container" onclick="document.getElementById('f-avatar').click()">
+                    <img id="admin-avatar" src="https://via.placeholder.com/80">
+                    <div class="avatar-edit-hint">✎</div>
+                </div>
+                <h3 id="admin-display-name" style="margin: 10px 0 5px 0;">...</h3>
+                <input type="file" id="f-avatar" hidden accept="image/*">
             </div>
-            <button class="nav-link active" onclick="uiNav('view-post', this)">➕ مشروع جديد</button>
-            <button class="nav-link" onclick="uiNav('view-user', this)">👤 الحساب</button>
-            <button class="nav-link" onclick="uiNav('view-stats', this)">📊 الإحصائيات</button>
-            <button class="nav-link" onclick="uiTheme()">🌓 الوضع الليلي</button>
+            
+            <nav>
+                <button class="nav-item active" onclick="uiNav('view-post', this)">📑 المشاريع</button>
+                <button class="nav-item" onclick="uiNav('view-user', this)">⚙️ الإعدادات</button>
+                <button class="nav-item" onclick="uiNav('view-stats', this)">📈 التقارير</button>
+            </nav>
         </aside>
 
         <main class="workspace">
             <section id="view-post" class="panel active">
-                <div class="card">
-                    <h3>🚀 نشر مشروع جديد</h3>
-                    <input type="text" id="p-type" placeholder="التصنيف">
-                    <input type="text" id="p-title" placeholder="اسم المشروع">
-                    
-                    <label>الأيقونة:</label>
-                    <input type="file" id="f-icon" hidden>
-                    <button type="button" onclick="document.getElementById('f-icon').click()">رفع ملف</button>
-                    <div id="prev-icon" class="preview-grid"></div>
-
-                    <textarea id="p-desc" placeholder="وصف المشروع..." rows="5"></textarea>
-
-                    <label>صور المعرض:</label>
-                    <input type="file" id="f-screens" hidden multiple>
-                    <button type="button" onclick="document.getElementById('f-screens').click()">إضافة صور</button>
-                    <div id="prev-screens" class="preview-grid"></div>
-
-                    <div id="links-area">
-                        <label>الروابط:</label>
-                        <div style="display:flex; gap:10px; margin-bottom:10px;">
-                            <input type="text" class="l-url" placeholder="الرابط">
-                            <input type="text" class="l-txt" placeholder="نص الزر">
-                            <button type="button" onclick="uiAddLink()" style="background:var(--accent); color:white; width:45px; border-radius:10px; border:none;">+</button>
+                <div class="google-card">
+                    <h3>إنشاء مشروع جديد</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <label>اسم المشروع</label>
+                            <input type="text" id="p-title">
+                        </div>
+                        <div>
+                            <label>التصنيف</label>
+                            <input type="text" id="p-type">
                         </div>
                     </div>
 
-                    <button id="pub-btn" class="btn-kick">🚀 تنفيذ النشر</button>
+                    <label>الوصف</label>
+                    <textarea id="p-desc" rows="4"></textarea>
+
+                    <label>أيقونة المشروع</label>
+                    <input type="file" id="f-icon" hidden>
+                    <button type="button" class="btn-google" style="background:#f1f3f4; color:#3c4043; margin-bottom:15px;" onclick="document.getElementById('f-icon').click()">اختيار صورة</button>
+                    <div id="prev-icon" class="preview-box"></div>
+
+                    <label>صور المعرض</label>
+                    <input type="file" id="f-screens" hidden multiple>
+                    <button type="button" class="btn-google" style="background:#f1f3f4; color:#3c4043; margin-bottom:15px;" onclick="document.getElementById('f-screens').click()">إضافة لقطات شاشة</button>
+                    <div id="prev-screens" class="preview-box"></div>
+
+                    <div id="links-area">
+                        <label>روابط التحميل</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" class="l-url" placeholder="URL">
+                            <input type="text" class="l-txt" placeholder="Label">
+                            <button class="btn-google" onclick="uiAddLink()">+</button>
+                        </div>
+                    </div>
+
+                    <hr style="border:0; border-top:1px solid var(--border-color); margin:20px 0;">
+                    <button id="pub-btn" class="btn-google">نشر المشروع</button>
                 </div>
             </section>
 
             <section id="view-user" class="panel">
-                <div class="card">
-                    <h3>👤 إعدادات الحساب</h3>
-                    <input type="text" id="up-name" placeholder="الاسم الجديد">
-                    <input type="text" id="up-user" placeholder="اليوزر الجديد">
-                    <input type="password" id="up-pass" placeholder="الباسورد الجديد">
-                    <button class="btn-kick" onclick="engineUpdateProfile()">حفظ</button>
+                <div class="google-card">
+                    <h3>معلومات الحساب</h3>
+                    <input type="text" id="up-name" placeholder="الاسم الكامل">
+                    <input type="text" id="up-user" placeholder="اسم المستخدم">
+                    <input type="password" id="up-pass" placeholder="كلمة مرور جديدة">
+                    <button class="btn-google" onclick="engineUpdateProfile()">تحديث الحساب</button>
                 </div>
             </section>
 
             <section id="view-stats" class="panel">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                    <div class="card" style="text-align:center;"> <h1 id="stat-v">0</h1> <p>مشاهدات</p> </div>
-                    <div class="card" style="text-align:center;"> <h1 id="stat-d">0</h1> <p>تحميلات</p> </div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
+                    <div class="google-card" style="text-align:center;">
+                        <div style="color: var(--google-gray); font-size:12px; text-transform:uppercase;">المشاهدات</div>
+                        <div id="stat-v" style="font-size:32px; color:var(--google-blue); font-weight:500;">0</div>
+                    </div>
+                    <div class="google-card" style="text-align:center;">
+                        <div style="color: var(--google-gray); font-size:12px; text-transform:uppercase;">التحميلات</div>
+                        <div id="stat-d" style="font-size:32px; color:var(--google-blue); font-weight:500;">0</div>
+                    </div>
                 </div>
             </section>
         </main>
