@@ -2,19 +2,27 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم | محمد أمين</title>
     <style>
         :root { --sidebar-bg: #1a1a27; --main-bg: #151521; --accent: #3699ff; --text: #ffffff; --card: #1e1e2d; --input-bg: #151521; --border: #2b2b40; }
         [data-theme="light"] { --sidebar-bg: #f0f2f5; --main-bg: #ffffff; --accent: #1a73e8; --text: #1d1d1f; --card: #f8f9fa; --input-bg: #ffffff; --border: #dadce0; }
         
-        body { margin: 0; display: flex; font-family: 'Segoe UI', sans-serif; background: var(--main-bg); color: var(--text); transition: 0.3s; }
-        .sidebar { width: 280px; background: var(--sidebar-bg); height: 100vh; position: fixed; right: 0; padding: 25px; border-left: 1px solid var(--border); }
+        body { margin: 0; display: flex; font-family: 'Segoe UI', sans-serif; background: var(--main-bg); color: var(--text); transition: 0.3s; min-height: 100vh; }
+        
+        /* شاشة الدخول */
+        #login-screen { position: fixed; inset: 0; background: var(--main-bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid var(--border); width: 350px; text-align: center; }
+
+        /* الشريط الجانبي */
+        .sidebar { width: 280px; background: var(--sidebar-bg); height: 100vh; position: fixed; right: 0; padding: 25px; border-left: 1px solid var(--border); z-index: 100; }
         .sidebar-header { text-align: center; margin-bottom: 30px; }
-        .sidebar-header img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); padding: 3px; object-fit: cover; }
+        .sidebar-header img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; }
         
         .nav-item { padding: 14px; cursor: pointer; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; color: #a2a3b7; transition: 0.2s; }
         .nav-item:hover, .nav-item.active { background: var(--accent); color: white; }
 
+        /* المحتوى الرئيسي */
         .main-content { margin-right: 330px; flex: 1; padding: 40px; }
         .section { display: none; animation: fadeIn 0.4s ease; }
         .section.active { display: block; }
@@ -22,23 +30,20 @@
         .form-group { background: var(--card); padding: 25px; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border); }
         input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--input-bg); color: var(--text); outline: none; box-sizing: border-box; }
         
-        .upload-container { background: var(--input-bg); border: 2px dashed var(--border); padding: 20px; border-radius: 12px; text-align: center; margin: 15px 0; }
-        .preview-box { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; justify-content: center; position: relative; }
-        .preview-box img { width: 85px; height: 85px; border-radius: 10px; object-fit: cover; border: 2px solid var(--accent); }
-        
-        .btn-remove { position: absolute; top: -5px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 12px; }
         .btn-submit { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-secondary { background: var(--border); color: var(--text); border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; }
-
-        #login-screen { position: fixed; inset: 0; background: var(--main-bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .btn-secondary { background: var(--border); color: var(--text); border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; }
+        
+        .preview-box { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .preview-box img { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; border: 2px solid var(--accent); }
         .hidden { display: none; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body data-theme="dark">
+
     <div id="login-screen">
-        <div class="form-group" style="width:350px; text-align:center;">
-            <h2 style="color:var(--accent); margin-bottom: 20px;">ROOT ACCESS</h2>
+        <div class="login-box">
+            <h2 style="color:var(--accent);">ROOT ACCESS</h2>
             <input type="text" id="login-user" placeholder="اسم المستخدم">
             <input type="password" id="login-pass" placeholder="كلمة المرور">
             <button class="btn-submit" onclick="checkLogin()">دخول النظام</button>
@@ -60,66 +65,61 @@
         <div id="new-project" class="section active">
             <div class="form-group">
                 <h3>إضافة مشروع جديد</h3>
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="p-type" placeholder="نوع المشروع">
-                    <input type="text" id="p-title" placeholder="اسم المشروع">
-                </div>
-
-                <div class="upload-container">
-                    <p>أيقونة التطبيق</p>
-                    <div style="display:flex; gap:10px; justify-content:center; margin-bottom:10px;">
-                        <button onclick="document.getElementById('icon-file').click()" class="btn-secondary">رفع ملف</button>
-                        <button onclick="document.getElementById('icon-url-inp').classList.toggle('hidden')" class="btn-secondary">رابط مباشر</button>
+                <input type="text" id="p-type" placeholder="نوع المشروع (مثل: تطبيقات أندرويد)">
+                <input type="text" id="p-title" placeholder="اسم المشروع">
+                
+                <div style="border: 1px dashed var(--border); padding: 15px; border-radius: 10px; margin: 10px 0;">
+                    <p>أيقونة المشروع</p>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('icon-file').click()">رفع ملف</button>
+                        <input type="text" id="icon-url-inp" placeholder="أو ضع رابط مباشر" style="flex:1;">
                     </div>
                     <input type="file" id="icon-file" class="hidden" onchange="previewIcon(this)">
-                    <input type="text" id="icon-url-inp" class="hidden" placeholder="ضع الرابط هنا" oninput="previewIconUrl(this.value)">
                     <div id="icon-preview" class="preview-box"></div>
                 </div>
 
-                <textarea id="p-desc" placeholder="وصف المشروع..." rows="5"></textarea>
+                <textarea id="p-desc" placeholder="وصف المشروع..." rows="4"></textarea>
 
-                <div class="upload-container">
+                <div style="border: 1px dashed var(--border); padding: 15px; border-radius: 10px; margin: 10px 0;">
                     <p>صور المعرض (Screenshots)</p>
-                    <button onclick="document.getElementById('screens-file').click()" class="btn-secondary">رفع صور متعددة</button>
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('screens-file').click()">اختيار صور</button>
                     <input type="file" id="screens-file" class="hidden" multiple onchange="previewScreenshots(this)">
                     <div id="screens-preview" class="preview-box"></div>
                 </div>
 
                 <div id="links-container">
-                    <div style="display:flex; gap:10px; align-items: center;">
-                        <input type="text" class="link-url" id="p-link" placeholder="رابط التحميل">
-                        <input type="text" class="link-text" id="p-btn-title" placeholder="نص الزر">
-                        <button class="btn-secondary" onclick="addNewLinkField()">+</button>
+                    <p>روابط التحميل</p>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" class="link-url" placeholder="الرابط">
+                        <input type="text" class="link-text" placeholder="نص الزر (مثلاً: تحميل)">
+                        <button type="button" class="btn-secondary" onclick="addNewLinkField()">+</button>
                     </div>
                 </div>
-                
+
                 <button class="btn-submit" id="publish-btn" onclick="publishProject()">🚀 نشر المشروع الآن</button>
             </div>
         </div>
 
         <div id="profile" class="section">
             <div class="form-group">
-                <h3>إدارة الحساب</h3>
-                <p>تغيير الصورة الشخصية:</p>
-                <input type="file" id="new-profile-file" onchange="previewProfileUpload(this)">
-                <div id="profile-upload-preview" class="preview-box"></div>
-                
-                <input type="text" id="edit-name" placeholder="الاسم المستعار">
+                <h3>تحديث بيانات الحساب</h3>
+                <input type="file" id="new-profile-file" accept="image/*">
+                <input type="text" id="edit-name" placeholder="الاسم المستعار الجديد">
                 <input type="text" id="edit-user" placeholder="اسم المستخدم الجديد">
                 <input type="password" id="edit-pass" placeholder="كلمة المرور الجديدة">
-                <button class="btn-submit" onclick="updateAdminProfile()">تحديث البيانات</button>
+                <button class="btn-submit" onclick="updateAdminProfile()">حفظ التعديلات</button>
             </div>
         </div>
 
         <div id="stats" class="section">
             <div class="form-group">
-                <h3>إحصائيات الموقع</h3>
+                <h3>إحصائيات عامة</h3>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; text-align:center;">
-                    <div style="padding:20px; background:var(--input-bg); border-radius:12px;">
-                        <h2 id="total-views">0</h2> <p>مشاهدة</p>
+                    <div style="padding:20px; background:var(--input-bg); border-radius:12px; border:1px solid var(--border);">
+                        <h2 id="total-views" style="color:var(--accent);">0</h2> <p>إجمالي المشاهدات</p>
                     </div>
-                    <div style="padding:20px; background:var(--input-bg); border-radius:12px;">
-                        <h2 id="total-downloads">0</h2> <p>تحميل</p>
+                    <div style="padding:20px; background:var(--input-bg); border-radius:12px; border:1px solid var(--border);">
+                        <h2 id="total-downloads" style="color:var(--accent);">0</h2> <p>إجمالي التحميلات</p>
                     </div>
                 </div>
             </div>
