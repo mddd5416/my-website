@@ -3,124 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم الاحترافية | محمد أمين</title>
+    <title>ROOT Panel | محمد أمين</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --bg: #0f0f1a; --card: #161625; --accent: #3699ff; --text: #ffffff; --border: #2b2b40; }
-        [data-theme="light"] { --bg: #f0f2f5; --card: #ffffff; --accent: #0056b3; --text: #1d1d1f; --border: #d1d1d1; }
+        :root { --bg: #0b0b14; --card: #12121f; --accent: #3699ff; --text: #ffffff; --border: #242435; }
+        [data-theme="light"] { --bg: #f4f6f9; --card: #ffffff; --accent: #007bff; --text: #1d1d1f; --border: #dee2e6; }
         
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
 
-        /* واجهة تسجيل الدخول */
-        #login-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; }
-        .login-card { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid var(--border); width: 350px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+        /* طبقة الدخول المحصنة */
+        #auth-layer { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .auth-box { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid var(--border); width: 100%; max-width: 360px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
 
-        /* الهيكل الرئيسي */
-        .wrapper { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; display: none; } /* مخفية حتى الدخول */
+        /* هيكل اللوحة الرئيسي */
+        #main-app { display: grid; grid-template-columns: 280px 1fr; height: 100vh; visibility: hidden; opacity: 0; transition: opacity 0.4s ease; }
         
-        .sidebar { background: var(--card); border-left: 1px solid var(--border); padding: 30px 20px; position: sticky; top: 0; height: 100vh; box-sizing: border-box; }
-        .sidebar-user { text-align: center; margin-bottom: 30px; }
-        .sidebar-user img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; }
+        .sidebar { background: var(--card); border-left: 1px solid var(--border); padding: 30px; display: flex; flex-direction: column; }
+        .profile-section { text-align: center; margin-bottom: 40px; }
+        .profile-section img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--accent); margin-bottom: 12px; object-fit: cover; }
 
-        .nav-link { display: block; width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 12px; background: transparent; color: #a2a3b7; cursor: pointer; text-align: right; font-size: 16px; transition: 0.3s; }
-        .nav-link:hover, .nav-link.active { background: var(--accent); color: white; }
+        .nav-btn { padding: 14px 20px; margin: 6px 0; border: none; border-radius: 14px; background: transparent; color: #7e8299; cursor: pointer; text-align: right; font-weight: 600; transition: 0.2s; }
+        .nav-btn.active, .nav-btn:hover { background: #1b1b2e; color: var(--accent); }
 
-        .content { padding: 40px; }
-        .view-panel { display: none; animation: slideUp 0.4s ease-out; }
-        .view-panel.active { display: block; }
+        .workspace { padding: 40px; overflow-y: auto; }
+        .panel-view { display: none; }
+        .panel-view.active { display: block; animation: fadeIn 0.4s forwards; }
 
-        /* النماذج */
-        .form-box { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 20px; }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 10px; background: #0a0a14; color: white; outline: none; box-sizing: border-box; }
-        .main-btn { background: var(--accent); color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; font-size: 16px; }
-        .main-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        /* الحقول والأزرار */
+        .glass-card { background: var(--card); border: 1px solid var(--border); padding: 30px; border-radius: 20px; }
+        input, textarea { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid var(--border); border-radius: 12px; background: #080810; color: white; box-sizing: border-box; }
+        .btn-kick { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 12px; cursor: pointer; width: 100%; font-weight: bold; font-size: 15px; }
 
-        /* المعاينة */
-        .preview-grid { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
-        .thumb-box { position: relative; width: 85px; height: 85px; }
-        .thumb-box img { width: 100%; height: 100%; border-radius: 10px; object-fit: cover; border: 2px solid var(--accent); }
-        .x-del { position: absolute; top: -8px; right: -8px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; }
+        /* المعاينة المتطورة */
+        .preview-stack { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 15px; }
+        .img-item { position: relative; width: 90px; height: 90px; }
+        .img-item img { width: 100%; height: 100%; border-radius: 12px; object-fit: cover; border: 2px solid var(--border); }
+        .btn-kill { position: absolute; top: -10px; right: -10px; background: #f64e60; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div id="login-overlay">
-        <div class="login-card">
-            <h2 style="color:var(--accent)">نظام التحكم</h2>
-            <input type="text" id="auth-user" placeholder="اسم المستخدم">
-            <input type="password" id="auth-pass" placeholder="كلمة المرور">
-            <button class="main-btn" onclick="handleAuth()">دخول</button>
+    <div id="auth-layer">
+        <div class="auth-box">
+            <h2 style="margin-bottom: 30px; letter-spacing: 2px;">AUTHENTICATION</h2>
+            <input type="text" id="input-user" placeholder="اليوزر نيم">
+            <input type="password" id="input-pass" placeholder="كلمة المرور">
+            <button class="btn-kick" onclick="engineLogin()">فتح اللوحة</button>
         </div>
     </div>
 
-    <div class="wrapper" id="main-wrapper">
-        <div class="sidebar">
-            <div class="sidebar-user">
-                <img id="display-avatar" src="https://via.placeholder.com/90">
-                <h3 id="display-name">...</h3>
+    <div id="main-app">
+        <aside class="sidebar">
+            <div class="profile-section">
+                <img id="admin-img" src="https://via.placeholder.com/90">
+                <h3 id="admin-nick" style="margin: 0; font-size: 18px;">محمد أمين</h3>
             </div>
-            <button class="nav-link active" onclick="switchTab('tab-publish', this)">➕ نشر مشروع</button>
-            <button class="nav-link" onclick="switchTab('tab-profile', this)">👤 إعدادات الحساب</button>
-            <button class="nav-link" onclick="switchTab('tab-stats', this)">📊 الإحصائيات</button>
-            <button class="nav-link" onclick="uiToggleTheme()">🌓 تبديل الوضع</button>
-        </div>
+            <nav style="flex: 1;">
+                <button class="nav-btn active" onclick="uiNavigate('view-post', this)">➕ مشروع جديد</button>
+                <button class="nav-btn" onclick="uiNavigate('view-user', this)">👤 إعدادات الحساب</button>
+                <button class="nav-btn" onclick="uiNavigate('view-stats', this)">📊 الإحصائيات</button>
+            </nav>
+            <button class="nav-btn" onclick="uiToggleTheme()">🌓 تبديل الوضع</button>
+        </aside>
 
-        <div class="content">
-            <div id="tab-publish" class="view-panel active">
-                <div class="form-box">
-                    <h3>🚀 إضافة عمل جديد</h3>
-                    <input type="text" id="in-project-type" placeholder="نوع العمل (مثلاً: تطبيق أندرويد)">
-                    <input type="text" id="in-project-title" placeholder="اسم العمل">
+        <main class="workspace">
+            <section id="view-post" class="panel-view active">
+                <div class="glass-card">
+                    <h3>نشر مشروع جديد</h3>
+                    <input type="text" id="post-type" placeholder="التصنيف (مثلاً: Minecraft Mods)">
+                    <input type="text" id="post-title" placeholder="اسم المشروع">
                     
-                    <label>أيقونة العمل:</label>
-                    <input type="file" id="file-icon-input" hidden onchange="uiPreviewIcon(this)">
-                    <div style="display:flex; gap:10px;">
-                        <button type="button" style="width:100px" onclick="document.getElementById('file-icon-input').click()">اختيار</button>
-                        <input type="text" id="in-project-icon-url" placeholder="أو رابط خارجي">
+                    <div style="margin: 20px 0;">
+                        <label>أيقونة المشروع:</label>
+                        <div style="display:flex; gap:10px;">
+                            <button type="button" onclick="document.getElementById('file-icon').click()">رفع أيقونة</button>
+                            <input type="text" id="post-icon-url" placeholder="أو رابط مباشر" style="flex:1;">
+                        </div>
+                        <input type="file" id="file-icon" hidden onchange="uiPreview(this, 'box-icon', false)">
+                        <div id="box-icon" class="preview-stack"></div>
                     </div>
-                    <div id="zone-icon-preview" class="preview-grid"></div>
 
-                    <textarea id="in-project-desc" placeholder="وصف مفصل للعمل..." rows="5"></textarea>
+                    <textarea id="post-desc" placeholder="وصف المشروع بالتفصيل..." rows="6"></textarea>
 
-                    <label>صور العرض:</label>
-                    <input type="file" id="file-screens-input" hidden multiple onchange="uiPreviewScreens(this)">
-                    <button type="button" onclick="document.getElementById('file-screens-input').click()">إضافة صور للمعرض</button>
-                    <div id="zone-screens-preview" class="preview-grid"></div>
+                    <div style="margin: 20px 0;">
+                        <label>معرض الصور (Screenshots):</label>
+                        <button type="button" onclick="document.getElementById('file-screens').click()">اختيار الصور</button>
+                        <input type="file" id="file-screens" hidden multiple onchange="uiPreview(this, 'box-screens', true)">
+                        <div id="box-screens" class="preview-stack"></div>
+                    </div>
 
-                    <div id="container-links">
-                        <label>الروابط:</label>
+                    <div id="dynamic-links">
+                        <label>روابط التحميل:</label>
                         <div style="display:flex; gap:10px; margin-bottom:10px;">
-                            <input type="text" class="url-input" placeholder="رابط التحميل">
-                            <input type="text" class="txt-input" placeholder="نص الزر">
-                            <button type="button" onclick="uiAddLinkRow()" style="width:50px; background:var(--accent); border:none; border-radius:10px; color:white">+</button>
+                            <input type="text" class="link-src" placeholder="الرابط">
+                            <input type="text" class="link-label" placeholder="نص الزر">
+                            <button type="button" onclick="uiAddLink()" style="background:var(--accent); width:50px; color:white;">+</button>
                         </div>
                     </div>
 
-                    <button id="btn-publish-final" class="main-btn" onclick="logicPublish()">🚀 نشر العمل الآن</button>
+                    <button id="submit-project" class="btn-kick" onclick="enginePublish()">🚀 تنفيذ النشر الآن</button>
                 </div>
-            </div>
+            </section>
 
-            <div id="tab-profile" class="view-panel">
-                <div class="form-box">
-                    <h3>👤 تعديل الحساب</h3>
-                    <input type="text" id="up-display-name" placeholder="الاسم المستعار">
-                    <input type="text" id="up-username" placeholder="اسم مستخدم جديد">
-                    <input type="password" id="up-password" placeholder="كلمة مرور جديدة">
-                    <p>تغيير صورة البروفايل:</p>
-                    <input type="file" id="up-avatar-file">
-                    <button class="main-btn" onclick="logicUpdateProfile()">حفظ البيانات</button>
+            <section id="view-user" class="panel-view">
+                <div class="glass-card">
+                    <h3>تحديث بيانات المشرف</h3>
+                    <input type="text" id="new-nick" placeholder="الاسم المستعار">
+                    <input type="text" id="new-user" placeholder="اسم المستخدم">
+                    <input type="password" id="new-pass" placeholder="كلمة المرور">
+                    <button class="btn-kick" onclick="engineUpdateProfile()">حفظ التغييرات</button>
                 </div>
-            </div>
+            </section>
 
-            <div id="tab-stats" class="view-panel">
+            <section id="view-stats" class="panel-view">
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                    <div class="form-box" style="text-align:center;"> <h1 id="stat-views" style="color:var(--accent)">0</h1> <p>إجمالي المشاهدات</p> </div>
-                    <div class="form-box" style="text-align:center;"> <h1 id="stat-downloads" style="color:var(--accent)">0</h1> <p>إجمالي التحميلات</p> </div>
+                    <div class="glass-card" style="text-align:center;"> <h1 id="stat-v">0</h1> <p>مشاهدات</p> </div>
+                    <div class="glass-card" style="text-align:center;"> <h1 id="stat-d">0</h1> <p>تحميلات</p> </div>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
 
     <script src="Mscript.js"></script>
