@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Terminal Access // Manager</title>
+    <style>
+        body { background: #000; color: #00ff41; font-family: monospace; padding: 50px; }
+        .hidden { display: none; }
+        input, textarea { background: #000; border: 1px solid var(--p); color: var(--p); width: 100%; padding: 10px; margin: 10px 0; }
+        button { background: var(--p); color: #000; border: none; padding: 10px 20px; cursor: pointer; width: 100%; font-weight: bold; }
+        .login-box { max-width: 400px; margin: auto; border: 1px solid var(--p); padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <!-- واجهة تسجيل الدخول -->
+    <div id="login-area" class="login-box">
+        <h3>ENTER ACCESS KEY:</h3>
+        <input type="password" id="pass" placeholder="Password...">
+        <button onclick="checkPass()">ACCESS</button>
+    </div>
+
+    <!-- واجهة الإدارة المحمية -->
+    <div id="admin-area" class="hidden">
+        <h2>Welcome back, Amine.</h2>
+        <input type="text" id="t" placeholder="اسم المشروع">
+        <textarea id="d" placeholder="وصف المشروع"></textarea>
+        <input type="text" id="l" placeholder="رابط التحميل">
+        <input type="text" id="th" placeholder="التقنيات (Python, C++...)">
+        <button onclick="upload()">نشر المشروع في قاعدة البيانات</button>
+        <p id="status"></p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        let sb = null;
+
+        function checkPass() {
+            const p = document.getElementById('pass').value;
+            if(p === "Amine_Cyber_2026") { // كلمة المرور الخاصة بك
+                document.getElementById('login-area').classList.add('hidden');
+                document.getElementById('admin-area').classList.remove('hidden');
+                // تهيئة الاتصال فقط بعد التأكد من كلمة المرور
+                sb = supabase.createClient('YOUR_SUPABASE_URL', 'YOUR_PUBLIC_ANON_KEY');
+            } else {
+                alert("ACCESS DENIED");
+            }
+        }
+
+        async function upload() {
+            const { error } = await sb.from('projects').insert([{
+                title: document.getElementById('t').value,
+                desc: document.getElementById('d').value,
+                link: document.getElementById('l').value,
+                tech: document.getElementById('th').value
+            }]);
+            
+            if(!error) {
+                document.getElementById('status').innerText = "DONE: Project Uploaded.";
+                document.getElementById('t').value = '';
+            } else {
+                document.getElementById('status').innerText = "ERROR: " + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
