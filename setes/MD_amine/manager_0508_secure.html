@@ -2,99 +2,124 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة التحكم الاحترافية | محمد أمين</title>
+    <title>لوحة التحكم | محمد أمين</title>
     <style>
-        :root { --sidebar-bg: #1e1e2d; --main-bg: #f4f5f7; --accent: #007bff; --text-light: #ffffff; }
-        [data-theme="dark"] { --main-bg: #121212; --card: #1e1e2d; --text: #ffffff; }
+        :root { --sidebar-bg: #1a1a27; --main-bg: #151521; --accent: #3699ff; --text: #ffffff; --card: #1e1e2d; }
+        body { margin: 0; display: flex; font-family: 'Segoe UI', sans-serif; background: var(--main-bg); color: var(--text); }
         
-        body { margin: 0; display: flex; font-family: sans-serif; background: var(--main-bg); color: var(--text); transition: 0.3s; }
+        /* القائمة الجانبية في اليمين */
+        .sidebar { width: 280px; background: var(--sidebar-bg); height: 100vh; position: fixed; right: 0; padding: 25px; border-left: 1px solid #2b2b40; }
+        .sidebar-header { text-align: center; margin-bottom: 40px; }
+        .sidebar-header img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); padding: 3px; }
         
-        .sidebar { width: 260px; background: var(--sidebar-bg); color: var(--text-light); height: 100vh; position: fixed; right: 0; padding: 20px; z-index: 100; }
-        .nav-item { padding: 15px; cursor: pointer; border-radius: 8px; margin-bottom: 10px; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
-        .nav-item:hover, .nav-item.active { background: var(--accent); }
-        
-        .main-content { margin-right: 300px; flex: 1; padding: 40px; }
-        .section { display: none; animation: fadeIn 0.4s; }
+        .nav-item { padding: 15px; cursor: pointer; border-radius: 12px; margin-bottom: 12px; transition: 0.3s; display: flex; align-items: center; gap: 15px; color: #a2a3b7; }
+        .nav-item:hover, .nav-item.active { background: #2b2b40; color: var(--accent); }
+
+        .main-content { margin-right: 330px; flex: 1; padding: 40px; }
+        .section { display: none; animation: fadeIn 0.5s ease; }
         .section.active { display: block; }
         
-        .form-group { background: var(--card); padding: 25px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; background: transparent; color: inherit; }
+        /* المدخلات والنطاقات واضحة مع أنيميشن خفيف */
+        .form-group { background: var(--card); padding: 30px; border-radius: 16px; margin-bottom: 25px; border: 1px solid #2b2b40; }
+        input, textarea { width: 100%; padding: 14px; margin: 12px 0; border: 1px solid #2b2b40; border-radius: 10px; background: #151521; color: white; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--accent); }
         
-        .upload-zone { border: 2px dashed var(--accent); padding: 20px; border-radius: 12px; text-align: center; margin: 15px 0; }
-        .preview-box { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .preview-box img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; border: 1px solid var(--accent); }
-        
+        /* ديف الرفع المطور */
+        .upload-container { background: #151521; border: 2px dashed #2b2b40; padding: 20px; border-radius: 12px; text-align: center; margin: 15px 0; }
+        .upload-btns { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
+        .preview-box { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; justify-content: center; }
+        .preview-box img { width: 90px; height: 90px; border-radius: 10px; object-fit: cover; border: 2px solid var(--accent); animation: popIn 0.3s ease; }
+
+        .btn-submit { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .btn-secondary-add { background: #2b2b40; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; margin-top: 10px; }
         .hidden { display: none; }
-        button.publish-btn { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { from { transform: scale(0.8); } to { transform: scale(1); } }
     </style>
 </head>
-<body data-theme="dark">
-    <!-- حماية الدخول -->
+<body>
     <div id="login-screen" style="position:fixed; inset:0; background:var(--main-bg); z-index:9999; display:flex; align-items:center; justify-content:center;">
-        <div class="form-group" style="width:350px; text-align:center;">
-            <h2>MD ADMIN ACCESS</h2>
-            <input type="password" id="access-key" placeholder="كلمة المرور">
-            <button class="publish-btn" onclick="checkLogin()">دخول</button>
+        <div class="form-group" style="width:360px; text-align:center;">
+            <h2 style="color:var(--accent);">ROOT ACCESS</h2>
+            <input type="password" id="access-key" placeholder="كلمة المرور: MDaMiNeLD">
+            <button class="btn-submit" onclick="checkLogin()">دخول النظام</button>
         </div>
     </div>
 
     <div class="sidebar">
-        <div style="text-align:center; margin-bottom:30px;">
-            <img id="admin-avatar-sidebar" src="" style="width:70px; height:70px; border-radius:50%; border:2px solid var(--accent);">
+        <div class="sidebar-header">
+            <img id="admin-avatar-sidebar" src="">
             <h3 id="admin-name-sidebar">تحميل...</h3>
         </div>
+        <div class="nav-item" onclick="switchSection('profile', this)">👤 الحساب</div>
         <div class="nav-item active" onclick="switchSection('new-project', this)">➕ نشر مشروع جديد</div>
         <div class="nav-item" onclick="switchSection('stats', this)">📊 لوحة التحكم</div>
-        <div class="nav-item" onclick="switchSection('profile', this)">👤 الحساب</div>
         <div class="nav-item" onclick="switchSection('manage', this)">⚙️ إدارة المشاريع</div>
     </div>
 
     <div class="main-content">
-        <!-- قسم النشر -->
-        <div id="new-project" class="section active">
-            <div class="form-group">
-                <h3>بيانات المشروع الجديد</h3>
-                <input type="text" id="p-type" placeholder="نوع المشروع (مثل: بوت تليجرام)">
-                <input type="text" id="p-title" placeholder="اسم المشروع">
-                
-                <div class="upload-zone">
-                    <p>أيقونة التطبيق</p>
-                    <button onclick="document.getElementById('icon-file').click()">رفع ملف</button>
-                    <button onclick="document.getElementById('icon-url-input').classList.toggle('hidden')">استخدام رابط</button>
-                    <input type="file" id="icon-file" class="hidden" onchange="previewMedia('icon', this)">
-                    <input type="text" id="icon-url-input" class="hidden" placeholder="ضع رابط الأيقونة هنا" oninput="previewMedia('icon-url', this)">
-                    <div id="icon-preview" class="preview-box"></div>
-                </div>
-
-                <textarea id="p-desc" placeholder="وصف المشروع (اكتب بحرية، النص لن يخرج عن الديف)" rows="5"></textarea>
-
-                <div class="upload-zone">
-                    <p>صور من داخل التطبيق (معاينة للمستخدم)</p>
-                    <input type="file" id="screens-file" multiple onchange="previewScreenshots(this)">
-                    <div id="screens-preview" class="preview-box"></div>
-                </div>
-
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="p-link" placeholder="رابط التحميل/الزر">
-                    <input type="text" id="p-btn-text" placeholder="نص الزر">
-                </div>
-                <button class="publish-btn" onclick="publishProject()">🚀 نشر المشروع الآن</button>
-            </div>
-        </div>
-
         <!-- قسم الحساب -->
         <div id="profile" class="section">
             <div class="form-group">
-                <h3>إعدادات الحساب الشخصي</h3>
-                <input type="text" id="new-name" placeholder="الاسم الجديد">
-                <input type="text" id="new-avatar" placeholder="رابط صورة البروفايل">
-                <input type="password" id="new-pass" placeholder="كلمة سر جديدة (اختياري)">
-                <button class="publish-btn" onclick="saveProfile()">حفظ التعديلات</button>
+                <h3>تعديل بيانات المدير</h3>
+                <input type="text" id="edit-name" placeholder="الاسم الجديد">
+                <input type="text" id="edit-avatar" placeholder="رابط صورة البروفايل الجديد">
+                <input type="password" id="edit-pass" placeholder="كلمة السر الجديدة">
+                <button class="btn-submit" onclick="updateAdminProfile()">تحديث البيانات</button>
+            </div>
+        </div>
+
+        <!-- قسم النشر بالحرف -->
+        <div id="new-project" class="section active">
+            <div class="form-group">
+                <h3>إضافة مشروع متطور</h3>
+                <div style="display:flex; gap:15px;">
+                    <input type="text" id="p-type" placeholder="نوع المشروع (نص)">
+                    <input type="text" id="p-title" placeholder="اسم المشروع (نص)">
+                </div>
+
+                <div class="upload-container">
+                    <p>أيقونة التطبيق</p>
+                    <div class="upload-btns">
+                        <button onclick="toggleInput('icon', 'url')" class="btn-secondary-add">رابط</button>
+                        <button onclick="document.getElementById('icon-file').click()" class="btn-secondary-add">رفع</button>
+                    </div>
+                    <input type="file" id="icon-file" class="hidden" onchange="previewFile('icon', this)">
+                    <input type="text" id="icon-url-inp" class="hidden" placeholder="ضع رابط الأيقونة هنا" oninput="previewUrl('icon', this.value)">
+                    <div id="icon-preview" class="preview-box"></div>
+                </div>
+
+                <textarea id="p-desc" placeholder="وصف المشروع (النص محمي من الخروج)" rows="6"></textarea>
+
+                <div class="upload-container">
+                    <p>صور من داخل التطبيق (Screenshots)</p>
+                    <button onclick="document.getElementById('screens-file').click()" class="btn-secondary-add">رفع صور متعددة</button>
+                    <input type="file" id="screens-file" class="hidden" multiple onchange="previewScreenshots(this)">
+                    <div id="screens-preview" class="preview-box"></div>
+                </div>
+
+                <div style="display:flex; gap:10px; align-items: center;">
+                    <input type="text" id="p-link" placeholder="رابط الزر (رابط)">
+                    <input type="text" id="p-btn-title" placeholder="عنوان الزر (رابط)">
+                    <button class="btn-secondary-add" title="إضافة زر ثانوي">+</button>
+                </div>
+                
+                <button class="btn-submit" style="margin-top:20px;" onclick="publishProject()">🚀 نشر المشروع في الموقع</button>
+            </div>
+        </div>
+
+        <div id="stats" class="section">
+            <div class="form-group">
+                <h3>لوحة التحكم (الإحصائيات)</h3>
+                <p>عدد الزيارات الكلي: <span id="total-views">0</span></p>
+                <p>عدد التحميلات: <span id="total-downloads">0</span></p>
+                <p>التسجيلات: (سيتم إضافتها قريباً)</p>
             </div>
         </div>
         
-        <div id="stats" class="section"><h3>لوحة الإحصائيات قيد التطوير...</h3></div>
+        <div id="manage" class="section">
+            <h3>إدارة المشاريع والتعليقات (قريباً)</h3>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
