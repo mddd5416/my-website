@@ -9,16 +9,27 @@ async function loadProjects() {
     if (data) {
         list.innerHTML = data.map(p => `
             <div class="card">
+                <div class="card-header">
+                    <img src="${p.icon_url || 'https://via.placeholder.com/50'}" class="proj-icon">
+                    <span class="proj-type">${p.type || 'مشروع'}</span>
+                </div>
                 <h3>${p.title}</h3>
                 <p>${p.desc}</p>
-                <div>${p.tech ? p.tech.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('') : ''}</div>
-                <a href="${p.link}" class="btn" target="_blank">Download Source</a>
+                <div class="stats">
+                    <span>👁️ ${p.views || 0}</span>
+                    <span>📥 ${p.downloads || 0}</span>
+                </div>
+                <a href="${p.link}" class="btn" onclick="registerDownload(${p.id}, '${p.link}')" target="_blank">تحميل / دخول</a>
             </div>
         `).join('');
-    } else if (error) {
-        console.error("Error loading projects:", error.message);
+        // زيادة عدد زوار الصفحة العامة لمرة واحدة
+        updateGlobalViews();
     }
 }
 
-// تشغيل الدالة عند تحميل الصفحة
+async function registerDownload(id, url) {
+    // زيادة عداد التحميلات للمشروع المحدد
+    const { data } = await sb.rpc('increment_downloads', { row_id: id });
+}
+
 window.onload = loadProjects;
