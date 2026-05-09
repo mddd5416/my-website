@@ -7,13 +7,12 @@
         :root { --sidebar-bg: #1a1a27; --main-bg: #151521; --accent: #3699ff; --text: #ffffff; --card: #1e1e2d; --input-bg: #151521; --border: #2b2b40; }
         [data-theme="light"] { --sidebar-bg: #f0f2f5; --main-bg: #ffffff; --accent: #1a73e8; --text: #1d1d1f; --card: #f8f9fa; --input-bg: #ffffff; --border: #dadce0; }
         
-        body { margin: 0; display: flex; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--main-bg); color: var(--text); transition: 0.3s; }
-        
-        .sidebar { width: 280px; background: var(--sidebar-bg); height: 100vh; position: fixed; right: 0; padding: 25px; border-left: 1px solid var(--border); z-index: 100; }
+        body { margin: 0; display: flex; font-family: 'Segoe UI', sans-serif; background: var(--main-bg); color: var(--text); transition: 0.3s; }
+        .sidebar { width: 280px; background: var(--sidebar-bg); height: 100vh; position: fixed; right: 0; padding: 25px; border-left: 1px solid var(--border); }
         .sidebar-header { text-align: center; margin-bottom: 30px; }
         .sidebar-header img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); padding: 3px; object-fit: cover; }
         
-        .nav-item { padding: 14px; cursor: pointer; border-radius: 12px; margin-bottom: 10px; transition: 0.2s; display: flex; align-items: center; gap: 12px; color: #a2a3b7; }
+        .nav-item { padding: 14px; cursor: pointer; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; color: #a2a3b7; transition: 0.2s; }
         .nav-item:hover, .nav-item.active { background: var(--accent); color: white; }
 
         .main-content { margin-right: 330px; flex: 1; padding: 40px; }
@@ -70,7 +69,7 @@
                     <p>أيقونة التطبيق</p>
                     <div style="display:flex; gap:10px; justify-content:center; margin-bottom:10px;">
                         <button onclick="document.getElementById('icon-file').click()" class="btn-secondary">رفع ملف</button>
-                        <button onclick="toggleUrlInput()" class="btn-secondary">رابط مباشر</button>
+                        <button onclick="document.getElementById('icon-url-inp').classList.toggle('hidden')" class="btn-secondary">رابط مباشر</button>
                     </div>
                     <input type="file" id="icon-file" class="hidden" onchange="previewIcon(this)">
                     <input type="text" id="icon-url-inp" class="hidden" placeholder="ضع الرابط هنا" oninput="previewIconUrl(this.value)">
@@ -88,8 +87,8 @@
 
                 <div id="links-container">
                     <div style="display:flex; gap:10px; align-items: center;">
-                        <input type="text" class="link-url" placeholder="رابط التحميل / الموقع">
-                        <input type="text" class="link-text" placeholder="نص الزر (مثال: تحميل APK)">
+                        <input type="text" class="link-url" id="p-link" placeholder="رابط التحميل">
+                        <input type="text" class="link-text" id="p-btn-title" placeholder="نص الزر">
                         <button class="btn-secondary" onclick="addNewLinkField()">+</button>
                     </div>
                 </div>
@@ -105,11 +104,10 @@
                 <input type="file" id="new-profile-file" onchange="previewProfileUpload(this)">
                 <div id="profile-upload-preview" class="preview-box"></div>
                 
-                <p style="margin-top:20px;">البيانات الأساسية:</p>
                 <input type="text" id="edit-name" placeholder="الاسم المستعار">
                 <input type="text" id="edit-user" placeholder="اسم المستخدم الجديد">
                 <input type="password" id="edit-pass" placeholder="كلمة المرور الجديدة">
-                <button class="btn-submit" onclick="updateAdminProfile()">تحديث وإعادة تشغيل</button>
+                <button class="btn-submit" onclick="updateAdminProfile()">تحديث البيانات</button>
             </div>
         </div>
 
