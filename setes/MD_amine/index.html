@@ -10,42 +10,47 @@
         [data-theme="dark"] { --bg: #121212; --card: #1e1e1e; --text: #e8eaed; --accent: #8ab4f8; --border: #3c4043; }
         
         body { background: var(--bg); color: var(--text); font-family: 'Google Sans', sans-serif; transition: 0.3s; margin: 0; overflow-x: hidden; }
-        header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); sticky; top: 0; z-index: 1000; }
+        header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
 
         .main-layout { display: flex; height: calc(100vh - 70px); }
         .projects-grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; overflow-y: auto; }
         
-        /* حل مشكلة خروج النص */
+        /* حل مشكلة خروج النص بالحرف */
         .card { 
             background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; 
-            cursor: pointer; transition: 0.3s; height: fit-content; word-wrap: break-word; overflow-wrap: break-word; 
+            cursor: pointer; transition: 0.3s; height: fit-content; 
+            word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;
         }
+        .card h3 { margin: 0 0 10px 0; color: var(--accent); }
         .card p { font-size: 14px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         
-        /* واجهة العرض الجانبي */
+        /* واجهة العرض الجانبي المتطورة */
         #detail-view { flex: 1; background: var(--card); border-right: 1px solid var(--border); padding: 40px; display: none; overflow-y: auto; animation: slideIn 0.5s ease; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         .screenshot-gallery { display: flex; gap: 10px; overflow-x: auto; margin: 20px 0; padding-bottom: 10px; }
-        .screenshot-gallery img { height: 200px; border-radius: 8px; border: 1px solid var(--border); flex-shrink: 0; }
-        .close-btn { font-size: 24px; cursor: pointer; color: var(--accent); float: left; }
+        .screenshot-gallery img { height: 220px; border-radius: 12px; border: 1px solid var(--border); flex-shrink: 0; transition: 0.3s; }
+        .screenshot-gallery img:hover { transform: scale(1.02); }
+        .close-btn { font-size: 20px; cursor: pointer; color: var(--accent); font-weight: bold; margin-bottom: 20px; display: inline-block; }
     </style>
 </head>
 <body data-theme="dark">
     <header>
-        <div style="display:flex; align-items:center; gap:10px;">
-            <img id="header-avatar" src="" style="width:35px; height:35px; border-radius:50%; background: #eee;">
-            <span id="admin-name-display">محمد أمين</span>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <img id="header-avatar" src="" style="width:38px; height:38px; border-radius:50%; background: #333; object-fit: cover;">
+            <span id="admin-name-display" style="font-weight: bold;">محمد أمين</span>
         </div>
-        <button onclick="toggleTheme()" style="padding: 8px 16px; border-radius: 20px; cursor: pointer;">الكلار / السومبر</button>
+        <button onclick="toggleTheme()" style="background: var(--accent); color: white; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer;">الكلار / السومبر</button>
     </header>
 
     <div class="main-layout">
         <div id="detail-view">
-            <span class="close-btn" onclick="closeDetail()">&times; إغلاق</span>
+            <span class="close-btn" onclick="closeDetail()">← عودة للمشاريع</span>
             <div id="detail-content"></div>
         </div>
-        <div class="projects-grid" id="projects-list"></div>
+        <div class="projects-grid" id="projects-list">
+            <!-- سيتم جلب المشاريع عبر Uscript.js -->
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
