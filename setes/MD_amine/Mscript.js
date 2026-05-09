@@ -5,57 +5,40 @@ const sb = supabase.createClient(supabaseUrl, supabaseKey);
 let tempScreenshots = [];
 let iconFileRaw = null;
 
-// 1. نظام تسجيل الدخول المطور
 function checkLogin() {
-    const user = document.getElementById('login-user').value;
-    const pass = document.getElementById('login-pass').value;
-    
-    const savedUser = localStorage.getItem('admin_user') || "admin";
-    const savedPass = localStorage.getItem('admin_pass') || "MDaMiNeLD";
+    const u = document.getElementById('login-user').value;
+    const p = document.getElementById('login-pass').value;
+    const sU = localStorage.getItem('admin_user') || "admin";
+    const sP = localStorage.getItem('admin_pass') || "MDaMiNeLD";
 
-    if(user === savedUser && pass === savedPass) {
+    if(u === sU && p === sP) {
         document.getElementById('login-screen').style.display = 'none';
-        loadAdminData();
-        loadStats();
-    } else {
-        alert("خطأ في اليوزر أو الباسورد!");
-    }
+        loadAdminData(); loadStats();
+    } else alert("خطأ في البيانات!");
 }
 
-// 2. تبديل الوضع (Dark/Light)
 function toggleManagerTheme() {
-    const body = document.body;
-    const newTheme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    body.setAttribute('data-theme', newTheme);
+    const b = document.body;
+    b.setAttribute('data-theme', b.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 }
 
-// 3. معاينة الأيقونة مع زر الإلغاء
 function previewIcon(input) {
     if (input.files && input.files[0]) {
         iconFileRaw = input.files[0];
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            renderIconPreview(e.target.result);
-        };
-        reader.readAsDataURL(input.files[0]);
+        const r = new FileReader();
+        r.onload = e => renderIconPreview(e.target.result);
+        r.readAsDataURL(input.files[0]);
     }
 }
 
-function previewIconUrl(url) {
-    if(url) {
-        iconFileRaw = null; // نلغي الملف المرفوع إذا وضع رابط
-        renderIconPreview(url);
-    }
-}
+function previewIconUrl(url) { if(url) { iconFileRaw = null; renderIconPreview(url); } }
 
 function renderIconPreview(src) {
-    const container = document.getElementById('icon-preview');
-    container.innerHTML = `
-        <div style="position:relative; display:inline-block;">
+    document.getElementById('icon-preview').innerHTML = `
+        <div style="position:relative;">
             <img src="${src}">
             <button class="btn-remove" onclick="clearIcon()">×</button>
-        </div>
-    `;
+        </div>`;
 }
 
 function clearIcon() {
@@ -65,136 +48,68 @@ function clearIcon() {
     document.getElementById('icon-preview').innerHTML = "";
 }
 
-function toggleUrlInput() {
-    const inp = document.getElementById('icon-url-inp');
-    inp.classList.toggle('hidden');
-}
-
-// 4. معاينة لقطات الشاشة
 function previewScreenshots(input) {
-    const preview = document.getElementById('screens-preview');
-    preview.innerHTML = "";
+    const p = document.getElementById('screens-preview');
+    p.innerHTML = "";
     tempScreenshots = Array.from(input.files);
-    tempScreenshots.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const div = document.createElement('div');
-            div.style.position = "relative";
-            div.innerHTML = `<img src="${e.target.result}"><button class="btn-remove" onclick="removeScreenshot(${index})">×</button>`;
-            preview.appendChild(div);
+    tempScreenshots.forEach((f, i) => {
+        const r = new FileReader();
+        r.onload = e => {
+            const d = document.createElement('div');
+            d.style.position = "relative";
+            d.innerHTML = `<img src="${e.target.result}"><button class="btn-remove" onclick="tempScreenshots.splice(${i},1);this.parentElement.remove()">×</button>`;
+            p.appendChild(d);
         };
-        reader.readAsDataURL(file);
+        r.readAsDataURL(f);
     });
 }
 
-function removeScreenshot(index) {
-    tempScreenshots.splice(index, 1);
-    // تحديث المعاينة (بسيط لإعادة الرسم)
-    const preview = document.getElementById('screens-preview');
-    preview.innerHTML = "يرجى إعادة اختيار الصور بعد الحذف للتأكيد"; 
-}
-
-// 5. أزرار الروابط المتعددة
 function addNewLinkField() {
-    const container = document.getElementById('links-container');
-    const div = document.createElement('div');
-    div.style.display = "flex"; div.style.gap = "10px"; div.style.marginTop = "10px";
-    div.innerHTML = `
-        <input type="text" class="link-url" placeholder="رابط إضافي">
-        <input type="text" class="link-text" placeholder="نص الزر">
-        <button class="btn-secondary" onclick="this.parentElement.remove()">-</button>
-    `;
-    container.appendChild(div);
+    const c = document.getElementById('links-container');
+    const d = document.createElement('div');
+    d.style.display = "flex"; d.style.gap = "10px"; d.style.marginTop = "10px";
+    d.innerHTML = `<input type="text" class="link-url" placeholder="رابط إضافي"><input type="text" class="link-text" placeholder="نص الزر"><button class="btn-secondary" onclick="this.parentElement.remove()">-</button>`;
+    c.appendChild(d);
 }
 
-// 6. رفع الملفات لـ Supabase Storage
-async function uploadToMedia(file) {
-    const name = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
-    const { data, error } = await sb.storage.from('media').upload(name, file);
+async function uploadToMedia(f) {
+    const n = `${Date.now()}_${f.name.replace(/\s/g, '_')}`;
+    const { data, error } = await sb.storage.from('media').upload(n, f);
     if(error) throw error;
-    return sb.storage.from('media').getPublicUrl(name).data.publicUrl;
+    return sb.storage.from('media').getPublicUrl(n).data.publicUrl;
 }
 
-// 7. دالة النشر المصلحة
 async function publishProject() {
-    const btn = document.getElementById('publish-btn');
-    btn.disabled = true;
-    btn.innerText = "جاري النشر...";
-
+    const b = document.getElementById('publish-btn');
+    b.disabled = true; b.innerText = "جاري النشر...";
     try {
-        // أيقونة
-        let finalIcon = document.getElementById('icon-url-inp').value;
-        if(iconFileRaw) finalIcon = await uploadToMedia(iconFileRaw);
+        let iU = document.getElementById('icon-url-inp').value;
+        if(iconFileRaw) iU = await uploadToMedia(iconFileRaw);
 
-        if(!finalIcon) throw new Error("يجب اختيار أيقونة للمشروع");
+        const sU = [];
+        for(let f of tempScreenshots) sU.push(await uploadToMedia(f));
 
-        // صور المعرض
-        const screenshotUrls = [];
-        for(let file of tempScreenshots) {
-            screenshotUrls.push(await uploadToMedia(file));
-        }
+        const lU = Array.from(document.querySelectorAll('.link-url')).map(i => i.value);
+        const lT = Array.from(document.querySelectorAll('.link-text')).map(i => i.value);
 
-        // تجميع الروابط
-        const linkUrls = Array.from(document.querySelectorAll('.link-url')).map(i => i.value);
-        const linkTexts = Array.from(document.querySelectorAll('.link-text')).map(i => i.value);
-        
         const { error } = await sb.from('projects').insert([{
             title: document.getElementById('p-title').value,
             type: document.getElementById('p-type').value,
             desc: document.getElementById('p-desc').value,
-            icon_url: finalIcon,
-            screenshots: screenshotUrls,
-            link: fixUrl(linkUrls[0]), // الرابط الأول هو الأساسي
-            btn_text: linkTexts[0] || "تحميل",
-            extra_links: { urls: linkUrls, texts: linkTexts }, // تخزين الروابط الإضافية
+            icon_url: iU,
+            screenshots: sU,
+            link: fixUrl(lU[0]),
+            bnt_text: lT[0] || "تحميل", // bnt_text مطابق لجدولك
+            extra_links: { urls: lU, texts: lT },
             views: 0, downloads: 0
         }]);
 
         if(error) throw error;
-        alert("تم النشر بنجاح!");
-        location.reload();
-    } catch(e) {
-        alert("خطأ: " + e.message);
-        btn.disabled = false;
-        btn.innerText = "🚀 نشر المشروع الآن";
-    }
+        alert("تم النشر بنجاح!"); location.reload();
+    } catch(e) { alert("خطأ: " + e.message); b.disabled = false; b.innerText = "🚀 نشر المشروع الآن"; }
 }
 
-function fixUrl(url) { 
-    if(!url) return "#";
-    return url.startsWith('http') ? url : `https://${url}`; 
-}
-
-// 8. تحديث الحساب المطور
-let profileFileRaw = null;
-function previewProfileUpload(input) {
-    if (input.files && input.files[0]) {
-        profileFileRaw = input.files[0];
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            document.getElementById('profile-upload-preview').innerHTML = `<img src="${e.target.result}">`;
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-
-async function updateAdminProfile() {
-    const name = document.getElementById('edit-name').value;
-    const user = document.getElementById('edit-user').value;
-    const pass = document.getElementById('edit-pass').value;
-
-    if(name) localStorage.setItem('md_name', name);
-    if(user) localStorage.setItem('admin_user', user);
-    if(pass) localStorage.setItem('admin_pass', pass);
-
-    if(profileFileRaw) {
-        const url = await uploadToMedia(profileFileRaw);
-        localStorage.setItem('md_avatar', url);
-    }
-
-    alert("تم تحديث البيانات، سيتم إعادة التحميل..");
-    location.reload();
-}
+function fixUrl(u) { return !u ? "#" : (u.startsWith('http') ? u : `https://${u}`); }
 
 function loadAdminData() {
     document.getElementById('admin-name-sidebar').innerText = localStorage.getItem('md_name') || "محمد أمين";
@@ -216,4 +131,18 @@ function switchSection(id, el) {
     document.getElementById(id).classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     el.classList.add('active');
+}
+
+async function updateAdminProfile() {
+    const n = document.getElementById('edit-name').value;
+    const u = document.getElementById('edit-user').value;
+    const p = document.getElementById('edit-pass').value;
+    const f = document.getElementById('new-profile-file').files[0];
+
+    if(n) localStorage.setItem('md_name', n);
+    if(u) localStorage.setItem('admin_user', u);
+    if(p) localStorage.setItem('admin_pass', p);
+    if(f) localStorage.setItem('md_avatar', await uploadToMedia(f));
+
+    alert("تم التحديث!"); location.reload();
 }
