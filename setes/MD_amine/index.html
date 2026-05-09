@@ -9,53 +9,68 @@
         :root { --bg: #f8f9fa; --card: #ffffff; --text: #3c4043; --accent: #1a73e8; --border: #dadce0; }
         [data-theme="dark"] { --bg: #121212; --card: #1e1e1e; --text: #e8eaed; --accent: #8ab4f8; --border: #3c4043; }
         
-        body { background: var(--bg); color: var(--text); font-family: 'Google Sans', sans-serif; transition: 0.3s; margin: 0; }
-        header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        body { background: var(--bg); color: var(--text); font-family: 'Google Sans', sans-serif; transition: 0.3s; margin: 0; overflow: hidden; }
         
-        .theme-toggle { cursor: pointer; padding: 8px 16px; border: 1px solid var(--border); border-radius: 20px; background: var(--card); color: var(--text); }
+        header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        .main-layout { display: flex; height: calc(100vh - 70px); }
         
-        .main-layout { display: flex; padding: 20px; gap: 20px; height: calc(100vh - 80px); overflow: hidden; }
+        /* القسم الأيمن: المشاريع الصغيرة */
+        .projects-grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 25px; overflow-y: auto; }
         
-        /* القسم الأيمن للمشاريع الصغيرة */
-        .projects-grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; overflow-y: auto; padding-left: 10px; }
+        /* معالجة خروج النص وتصميم الكارت */
+        .card { 
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; 
+            cursor: pointer; transition: 0.3s; position: relative; height: fit-content;
+            word-wrap: break-word; overflow-wrap: break-word; /* منع خروج النص */
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .card.active { border: 2px solid var(--accent); background: rgba(26, 115, 232, 0.05); }
+
+        /* القسم الأيسر: عرض التفاصيل المكبرة */
+        #detail-view { 
+            flex: 1; background: var(--card); border-right: 1px solid var(--border); 
+            padding: 40px; display: none; overflow-y: auto; position: relative; 
+            animation: slideLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        }
+        @keyframes slideLeft { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .close-detail { position: absolute; left: 20px; top: 20px; cursor: pointer; font-size: 28px; color: var(--accent); }
+        .detail-img { width: 100%; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .gallery { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
+        .gallery img { height: 180px; border-radius: 8px; flex-shrink: 0; border: 1px solid var(--border); }
         
-        /* القسم الأيسر للعرض المكبر */
-        #expanded-view { flex: 1; background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 30px; display: none; position: relative; overflow-y: auto; animation: slideIn 0.4s ease; }
-        
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; cursor: pointer; transition: 0.2s; position: relative; }
-        .card:hover { transform: translateY(-4px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .card.active { border: 2px solid var(--accent); }
-        
-        .proj-icon { width: 40px; height: 40px; border-radius: 8px; margin-bottom: 10px; }
-        .summary { font-size: 13px; color: #888; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        
-        @keyframes slideIn { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
-        .close-btn { position: absolute; left: 20px; top: 20px; font-size: 24px; cursor: pointer; color: var(--accent); }
-        
-        .expanded-content img { width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px; margin-bottom: 20px; }
-        .btn { display: inline-block; background: var(--accent); color: #fff; padding: 12px 30px; border-radius: 8px; text-decoration: none; margin-top: 20px; }
+        .btn-main { display: inline-block; background: var(--accent); color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 500; margin-top: 20px; }
     </style>
 </head>
-<body>
+<body data-theme="dark">
     <header>
-        <h1>مختبر محمد أمين</h1>
-        <button class="theme-toggle" onclick="toggleTheme()">تحويل المظهر</button>
+        <div id="admin-brand" style="display:flex; align-items:center; gap:10px;">
+            <img id="admin-avatar-header" src="https://via.placeholder.com/35" style="border-radius:50%; width:35px; height:35px;">
+            <span id="admin-name-header">محمد أمين</span>
+        </div>
+        <button onclick="toggleTheme()" style="background:none; border:1px solid var(--border); color:var(--text); padding:8px 15px; border-radius:20px; cursor:pointer;">الكلار / السومبر</button>
     </header>
 
     <div class="main-layout">
-        <div id="expanded-view">
-            <span class="close-btn" onclick="closeExpanded()">&times;</span>
-            <div id="expanded-data" class="expanded-content"></div>
+        <div id="detail-view">
+            <span class="close-detail" onclick="closeDetail()">&times;</span>
+            <div id="detail-content">
+                <!-- تفاصيل المشروع ستظهر هنا -->
+            </div>
         </div>
-        <div class="projects-grid" id="projects-list"></div>
+        <div class="projects-grid" id="projects-list">
+            <!-- المشاريع ستظهر هنا -->
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="Uscript.js"></script>
     <script>
         function toggleTheme() {
-            const current = document.body.getAttribute('data-theme');
-            document.body.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+            const body = document.body;
+            const theme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', theme);
         }
     </script>
 </body>
