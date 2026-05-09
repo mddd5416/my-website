@@ -4,111 +4,127 @@
     <meta charset="UTF-8">
     <title>لوحة التحكم | محمد أمين</title>
     <style>
-        :root { --sidebar-bg: #1a1a27; --main-bg: #151521; --accent: #3699ff; --text: #ffffff; --card: #1e1e2d; }
-        body { margin: 0; display: flex; font-family: 'Segoe UI', sans-serif; background: var(--main-bg); color: var(--text); }
+        :root { --sidebar-bg: #1a1a27; --main-bg: #151521; --accent: #3699ff; --text: #ffffff; --card: #1e1e2d; --input-bg: #151521; --border: #2b2b40; }
+        [data-theme="light"] { --sidebar-bg: #f0f2f5; --main-bg: #ffffff; --accent: #1a73e8; --text: #1d1d1f; --card: #f8f9fa; --input-bg: #ffffff; --border: #dadce0; }
         
-        .sidebar { width: 280px; background: var(--sidebar-bg); height: 100vh; position: fixed; right: 0; padding: 25px; border-left: 1px solid #2b2b40; }
-        .sidebar-header img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); margin-bottom: 10px; }
+        body { margin: 0; display: flex; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--main-bg); color: var(--text); transition: 0.3s; }
         
-        .nav-item { padding: 15px; cursor: pointer; border-radius: 12px; margin-bottom: 12px; transition: 0.3s; display: flex; align-items: center; gap: 15px; color: #a2a3b7; }
-        .nav-item:hover, .nav-item.active { background: #2b2b40; color: var(--accent); }
+        .sidebar { width: 280px; background: var(--sidebar-bg); height: 100vh; position: fixed; right: 0; padding: 25px; border-left: 1px solid var(--border); z-index: 100; }
+        .sidebar-header { text-align: center; margin-bottom: 30px; }
+        .sidebar-header img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); padding: 3px; object-fit: cover; }
+        
+        .nav-item { padding: 14px; cursor: pointer; border-radius: 12px; margin-bottom: 10px; transition: 0.2s; display: flex; align-items: center; gap: 12px; color: #a2a3b7; }
+        .nav-item:hover, .nav-item.active { background: var(--accent); color: white; }
 
         .main-content { margin-right: 330px; flex: 1; padding: 40px; }
-        .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.5s ease; }
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
         
-        .form-group { background: var(--card); padding: 30px; border-radius: 16px; margin-bottom: 25px; }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #2b2b40; border-radius: 8px; background: #151521; color: white; outline: none; }
+        .form-group { background: var(--card); padding: 25px; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border); }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--input-bg); color: var(--text); outline: none; box-sizing: border-box; }
         
-        .upload-container { border: 2px dashed #2b2b40; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
-        .preview-box img { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; margin: 5px; border: 2px solid var(--accent); }
+        .upload-container { background: var(--input-bg); border: 2px dashed var(--border); padding: 20px; border-radius: 12px; text-align: center; margin: 15px 0; }
+        .preview-box { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; justify-content: center; position: relative; }
+        .preview-box img { width: 85px; height: 85px; border-radius: 10px; object-fit: cover; border: 2px solid var(--accent); }
+        
+        .btn-remove { position: absolute; top: -5px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 12px; }
+        .btn-submit { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-secondary { background: var(--border); color: var(--text); border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 13px; }
 
-        .btn-submit { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        #login-screen { position: fixed; inset: 0; background: var(--main-bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .hidden { display: none; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body>
-    <div id="login-screen" style="position:fixed; inset:0; background:var(--main-bg); z-index:9999; display:flex; align-items:center; justify-content:center;">
-        <div class="form-group" style="width:360px; text-align:center;">
-            <h2 style="color:var(--accent);">ROOT ACCESS</h2>
-            <input type="password" id="access-key" placeholder="كلمة المرور">
+<body data-theme="dark">
+    <div id="login-screen">
+        <div class="form-group" style="width:350px; text-align:center;">
+            <h2 style="color:var(--accent); margin-bottom: 20px;">ROOT ACCESS</h2>
+            <input type="text" id="login-user" placeholder="اسم المستخدم">
+            <input type="password" id="login-pass" placeholder="كلمة المرور">
             <button class="btn-submit" onclick="checkLogin()">دخول النظام</button>
         </div>
     </div>
 
     <div class="sidebar">
-        <div class="sidebar-header" style="text-align:center; margin-bottom:30px;">
-            <img id="admin-avatar-sidebar" src="">
-            <h3 id="admin-name-sidebar">...</h3>
+        <div class="sidebar-header">
+            <img id="admin-avatar-sidebar" src="https://via.placeholder.com/80">
+            <h3 id="admin-name-sidebar">محمد أمين</h3>
         </div>
-        <div class="nav-item" onclick="switchSection('profile', this)">👤 الحساب</div>
         <div class="nav-item active" onclick="switchSection('new-project', this)">➕ نشر مشروع</div>
+        <div class="nav-item" onclick="switchSection('profile', this)">👤 الحساب</div>
         <div class="nav-item" onclick="switchSection('stats', this)">📊 الإحصائيات</div>
-        <div class="nav-item" onclick="switchSection('manage', this)">⚙️ الإدارة</div>
+        <div class="nav-item" onclick="toggleManagerTheme()">🌓 تبديل الوضع</div>
     </div>
 
     <div class="main-content">
         <div id="new-project" class="section active">
             <div class="form-group">
                 <h3>إضافة مشروع جديد</h3>
-                <div style="display:flex; gap:15px;">
-                    <input type="text" id="p-type" placeholder="نوع المشروع (مثل: Android)">
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="p-type" placeholder="نوع المشروع">
                     <input type="text" id="p-title" placeholder="اسم المشروع">
                 </div>
-                <textarea id="p-desc" placeholder="وصف المشروع بالتفصيل..." rows="6"></textarea>
 
                 <div class="upload-container">
-                    <p>أيقونة المشروع</p>
-                    <button type="button" onclick="document.getElementById('icon-file').click()">رفع ملف</button>
-                    <input type="file" id="icon-file" class="hidden" onchange="previewFile(this, 'icon-preview')">
-                    <input type="text" id="icon-url-inp" placeholder="أو ضع رابط مباشر هنا">
+                    <p>أيقونة التطبيق</p>
+                    <div style="display:flex; gap:10px; justify-content:center; margin-bottom:10px;">
+                        <button onclick="document.getElementById('icon-file').click()" class="btn-secondary">رفع ملف</button>
+                        <button onclick="toggleUrlInput()" class="btn-secondary">رابط مباشر</button>
+                    </div>
+                    <input type="file" id="icon-file" class="hidden" onchange="previewIcon(this)">
+                    <input type="text" id="icon-url-inp" class="hidden" placeholder="ضع الرابط هنا" oninput="previewIconUrl(this.value)">
                     <div id="icon-preview" class="preview-box"></div>
                 </div>
 
+                <textarea id="p-desc" placeholder="وصف المشروع..." rows="5"></textarea>
+
                 <div class="upload-container">
-                    <p>صور من الداخل (Screenshots)</p>
-                    <input type="file" id="screens-file" multiple onchange="previewScreenshots(this)">
+                    <p>صور المعرض (Screenshots)</p>
+                    <button onclick="document.getElementById('screens-file').click()" class="btn-secondary">رفع صور متعددة</button>
+                    <input type="file" id="screens-file" class="hidden" multiple onchange="previewScreenshots(this)">
                     <div id="screens-preview" class="preview-box"></div>
                 </div>
 
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="p-link" placeholder="رابط التحميل">
-                    <input type="text" id="p-btn-title" placeholder="عنوان الزر (اختياري)">
+                <div id="links-container">
+                    <div style="display:flex; gap:10px; align-items: center;">
+                        <input type="text" class="link-url" placeholder="رابط التحميل / الموقع">
+                        <input type="text" class="link-text" placeholder="نص الزر (مثال: تحميل APK)">
+                        <button class="btn-secondary" onclick="addNewLinkField()">+</button>
+                    </div>
                 </div>
                 
                 <button class="btn-submit" id="publish-btn" onclick="publishProject()">🚀 نشر المشروع الآن</button>
             </div>
         </div>
 
+        <div id="profile" class="section">
+            <div class="form-group">
+                <h3>إدارة الحساب</h3>
+                <p>تغيير الصورة الشخصية:</p>
+                <input type="file" id="new-profile-file" onchange="previewProfileUpload(this)">
+                <div id="profile-upload-preview" class="preview-box"></div>
+                
+                <p style="margin-top:20px;">البيانات الأساسية:</p>
+                <input type="text" id="edit-name" placeholder="الاسم المستعار">
+                <input type="text" id="edit-user" placeholder="اسم المستخدم الجديد">
+                <input type="password" id="edit-pass" placeholder="كلمة المرور الجديدة">
+                <button class="btn-submit" onclick="updateAdminProfile()">تحديث وإعادة تشغيل</button>
+            </div>
+        </div>
+
         <div id="stats" class="section">
             <div class="form-group">
-                <h2>إجمالي النشاط</h2>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                    <div style="background:#151521; padding:20px; border-radius:12px; text-align:center;">
-                        <h1 id="total-views">0</h1>
-                        <p>زيارة إجمالية</p>
+                <h3>إحصائيات الموقع</h3>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; text-align:center;">
+                    <div style="padding:20px; background:var(--input-bg); border-radius:12px;">
+                        <h2 id="total-views">0</h2> <p>مشاهدة</p>
                     </div>
-                    <div style="background:#151521; padding:20px; border-radius:12px; text-align:center;">
-                        <h1 id="total-downloads">0</h1>
-                        <p>تحميل إجمالي</p>
+                    <div style="padding:20px; background:var(--input-bg); border-radius:12px;">
+                        <h2 id="total-downloads">0</h2> <p>تحميل</p>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div id="profile" class="section">
-            <div class="form-group">
-                <h3>تعديل البيانات الشخصية</h3>
-                <input type="text" id="edit-name" placeholder="الاسم الجديد">
-                <input type="text" id="edit-avatar" placeholder="رابط صورة البروفايل">
-                <button class="btn-submit" onclick="updateAdminProfile()">تحديث</button>
-            </div>
-        </div>
-
-        <div id="manage" class="section">
-            <h3>المشاريع المنشورة</h3>
-            <div id="manage-list"></div>
         </div>
     </div>
 
