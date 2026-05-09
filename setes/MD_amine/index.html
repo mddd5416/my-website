@@ -6,11 +6,11 @@
     <title>معرض مشاريع محمد أمين</title>
     <style>
         :root { --p: #00ff41; --bg: #050505; --card: #0f0f0f; --sec: #00d4ff; }
-        body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
+        body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         header { border-bottom: 2px solid var(--p); padding: 30px; text-align: center; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); }
         header h1 { color: var(--p); margin: 0; letter-spacing: 2px; }
         .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
-        .card { background: var(--card); border: 1px solid #222; border-radius: 12px; padding: 20px; transition: 0.3s; position: relative; }
+        .card { background: var(--card); border: 1px solid #222; border-radius: 12px; padding: 20px; transition: 0.3s; }
         .card:hover { border-color: var(--p); transform: translateY(-5px); }
         .card h3 { color: var(--sec); margin-top: 0; }
         .tag { background: #1a1a1a; color: var(--p); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; border: 0.5px solid var(--p); margin-left: 5px; }
@@ -19,31 +19,14 @@
     </style>
 </head>
 <body>
-    <header><h1>M.AMINE // PROJECTS_PORTFOLIO</h1></header>
+    <header><h1>M.AMINE // PROJECTS</h1></header>
     <div class="container" id="projects-list">
-        <!-- يتم جلب المشاريع هنا تلقائياً -->
+        <!-- سيتم جلب المشاريع بواسطة Uscript.js -->
     </div>
 
+    <!-- مكتبة Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const supabaseUrl = 'https://ibqvftckjsyfnyembggc.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlicXZmdGNranN5Zm55ZW1iZ2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNDI3OTUsImV4cCI6MjA5MzkxODc5NX0.EQNGQz5ckjFa-2b0sFpZ6AWhWkYDl0YP5noN7vAcGK4';
-        const sb = supabase.createClient(supabaseUrl, supabaseKey);
-
-        async function loadProjects() {
-            const { data, error } = await sb.from('projects').select('*').order('id', { ascending: false });
-            if(data) {
-                document.getElementById('projects-list').innerHTML = data.map(p => `
-                    <div class="card">
-                        <h3>${p.title}</h3>
-                        <p>${p.desc}</p>
-                        <div>${p.tech ? p.tech.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('') : ''}</div>
-                        <a href="${p.link}" class="btn" target="_blank">Download Source</a>
-                    </div>
-                `).join('');
-            }
-        }
-        loadProjects();
-    </script>
+    <!-- استدعاء ملف الجافا الخاص بالمستخدمين -->
+    <script src="Uscript.js"></script>
 </body>
 </html>
