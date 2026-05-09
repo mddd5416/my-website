@@ -7,26 +7,29 @@
     <style>
         :root { --p: #00ff41; --bg: #050505; --card: #0f0f0f; --sec: #00d4ff; }
         body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        header { border-bottom: 2px solid var(--p); padding: 30px; text-align: center; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); }
-        header h1 { color: var(--p); margin: 0; letter-spacing: 2px; }
-        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
-        .card { background: var(--card); border: 1px solid #222; border-radius: 12px; padding: 20px; transition: 0.3s; }
-        .card:hover { border-color: var(--p); transform: translateY(-5px); }
-        .card h3 { color: var(--sec); margin-top: 0; }
+        header { border-bottom: 2px solid var(--p); padding: 40px; text-align: center; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); }
+        header h1 { color: var(--p); margin: 0; letter-spacing: 2px; font-size: 2rem; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        .card { background: var(--card); border: 1px solid #222; border-radius: 15px; padding: 25px; transition: 0.3s; position: relative; overflow: hidden; }
+        .card:hover { border-color: var(--p); transform: translateY(-8px); box-shadow: 0 10px 30px rgba(0,255,65,0.1); }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .proj-icon { width: 55px; height: 55px; border-radius: 12px; object-fit: cover; border: 1.5px solid var(--p); background: #111; }
+        .proj-type { font-size: 0.75rem; background: var(--p); color: #000; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+        .card h3 { color: var(--sec); margin: 10px 0; font-size: 1.4rem; }
+        .card p { color: #ccc; font-size: 0.95rem; line-height: 1.6; min-height: 50px; }
+        .stats { display: flex; gap: 20px; font-size: 0.85rem; color: #888; margin: 15px 0; border-top: 1px solid #222; padding-top: 15px; }
         .tag { background: #1a1a1a; color: var(--p); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; border: 0.5px solid var(--p); margin-left: 5px; }
-        .btn { display: block; width: 100%; text-align: center; background: var(--p); color: #000; padding: 10px 0; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 20px; transition: 0.3s; }
-        .btn:hover { background: #00cc33; box-shadow: 0 0 10px var(--p); }
+        .btn { display: block; width: 100%; text-align: center; background: var(--p); color: #000; padding: 12px 0; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        .btn:hover { background: #00cc33; box-shadow: 0 0 15px var(--p); }
     </style>
 </head>
 <body>
-    <header><h1>M.AMINE // PROJECTS</h1></header>
+    <header><h1>M.AMINE // DIGITAL_LAB</h1></header>
     <div class="container" id="projects-list">
-        <!-- سيتم جلب المشاريع بواسطة Uscript.js -->
+        <!-- يتم تحميل المشاريع هنا -->
     </div>
 
-    <!-- مكتبة Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- استدعاء ملف الجافا الخاص بالمستخدمين -->
     <script src="Uscript.js"></script>
 </body>
 </html>
