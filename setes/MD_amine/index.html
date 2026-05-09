@@ -4,31 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>معرض مشاريع محمد أمين</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #00ff41; --bg: #050505; --card: #0f0f0f; --sec: #00d4ff; }
-        body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        header { border-bottom: 2px solid var(--p); padding: 40px; text-align: center; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); }
-        header h1 { color: var(--p); margin: 0; letter-spacing: 2px; font-size: 2rem; }
-        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
-        .card { background: var(--card); border: 1px solid #222; border-radius: 15px; padding: 25px; transition: 0.3s; position: relative; overflow: hidden; }
-        .card:hover { border-color: var(--p); transform: translateY(-8px); box-shadow: 0 10px 30px rgba(0,255,65,0.1); }
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
-        .proj-icon { width: 55px; height: 55px; border-radius: 12px; object-fit: cover; border: 1.5px solid var(--p); background: #111; }
-        .proj-type { font-size: 0.75rem; background: var(--p); color: #000; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
-        .card h3 { color: var(--sec); margin: 10px 0; font-size: 1.4rem; }
-        .card p { color: #ccc; font-size: 0.95rem; line-height: 1.6; min-height: 50px; }
-        .stats { display: flex; gap: 20px; font-size: 0.85rem; color: #888; margin: 15px 0; border-top: 1px solid #222; padding-top: 15px; }
-        .tag { background: #1a1a1a; color: var(--p); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; border: 0.5px solid var(--p); margin-left: 5px; }
-        .btn { display: block; width: 100%; text-align: center; background: var(--p); color: #000; padding: 12px 0; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        .btn:hover { background: #00cc33; box-shadow: 0 0 15px var(--p); }
+        :root { --google-blue: #1a73e8; --bg: #f8f9fa; --text: #3c4043; --card-bg: #ffffff; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Google Sans', sans-serif; margin: 0; padding: 0; }
+        header { background: #fff; padding: 20px; text-align: center; border-bottom: 1px solid #dadce0; }
+        header h1 { margin: 0; color: #5f6368; font-weight: 400; font-size: 24px; }
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        .card { background: var(--card-bg); border: 1px solid #dadce0; border-radius: 12px; padding: 24px; transition: all 0.3s ease; display: flex; flex-direction: column; justify-content: space-between; }
+        .card:hover { box-shadow: 0 4px 12px rgba(60,64,67,0.15); border-color: transparent; }
+        .card-header { display: flex; align-items: center; margin-bottom: 16px; gap: 16px; }
+        .proj-icon { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; background: #f1f3f4; padding: 4px; }
+        .proj-type { font-size: 12px; color: var(--google-blue); font-weight: 500; border: 1px solid #dadce0; padding: 4px 12px; border-radius: 16px; }
+        .card h3 { margin: 0; font-size: 18px; color: #202124; font-weight: 500; }
+        /* منع خروج النص عن الديف */
+        .card p { color: #5f6368; font-size: 14px; line-height: 1.5; margin: 16px 0; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
+        .stats { display: flex; gap: 16px; font-size: 12px; color: #70757a; margin-bottom: 16px; }
+        .btn { display: inline-block; background: var(--google-blue); color: #fff; text-align: center; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; transition: background 0.2s; border: none; }
+        .btn:hover { background: #185abc; box-shadow: 0 1px 3px rgba(60,64,67,0.3); }
     </style>
 </head>
 <body>
-    <header><h1>M.AMINE // DIGITAL_LAB</h1></header>
-    <div class="container" id="projects-list">
-        <!-- يتم تحميل المشاريع هنا -->
-    </div>
-
+    <header><h1>مختبر محمد أمين الرقمي</h1></header>
+    <div class="container" id="projects-list"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="Uscript.js"></script>
 </body>
