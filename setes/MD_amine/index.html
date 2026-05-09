@@ -2,45 +2,48 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>معرض مشاريع محمد أمين</title>
     <style>
-        :root { --p: #00ff41; --bg: #050505; --c: #111; }
-        body { background: var(--bg); color: #fff; font-family: 'Courier New', monospace; margin: 0; }
-        header { border-bottom: 2px solid var(--p); padding: 20px; text-align: center; box-shadow: 0 0 15px var(--p); }
-        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; padding: 40px; }
-        .card { background: var(--c); border: 1px solid #333; padding: 20px; border-radius: 8px; transition: 0.3s; }
-        .card:hover { border-color: var(--p); transform: scale(1.02); }
-        .card h3 { color: var(--p); margin-top: 0; }
-        .btn { display: block; background: var(--p); color: #000; text-align: center; padding: 10px; text-decoration: none; font-weight: bold; border-radius: 4px; margin-top: 15px; }
-        .tag { color: #00d4ff; font-size: 12px; border: 1px solid #00d4ff; padding: 2px 5px; border-radius: 3px; }
+        :root { --p: #00ff41; --bg: #050505; --card: #0f0f0f; --sec: #00d4ff; }
+        body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
+        header { border-bottom: 2px solid var(--p); padding: 30px; text-align: center; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); }
+        header h1 { color: var(--p); margin: 0; letter-spacing: 2px; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .card { background: var(--card); border: 1px solid #222; border-radius: 12px; padding: 20px; transition: 0.3s; position: relative; }
+        .card:hover { border-color: var(--p); transform: translateY(-5px); }
+        .card h3 { color: var(--sec); margin-top: 0; }
+        .tag { background: #1a1a1a; color: var(--p); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; border: 0.5px solid var(--p); margin-left: 5px; }
+        .btn { display: block; width: 100%; text-align: center; background: var(--p); color: #000; padding: 10px 0; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 20px; transition: 0.3s; }
+        .btn:hover { background: #00cc33; box-shadow: 0 0 10px var(--p); }
     </style>
 </head>
 <body>
-    <header><h1>M.AMINE // PROJECTS_DB</h1></header>
+    <header><h1>M.AMINE // PROJECTS_PORTFOLIO</h1></header>
     <div class="container" id="projects-list">
-        <!-- ستظهر المشاريع هنا تلقائياً -->
+        <!-- يتم جلب المشاريع هنا تلقائياً -->
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // إعدادات Supabase (للقراءة فقط)
-        const supabase = supabase.createClient('YOUR_SUPABASE_URL', 'YOUR_PUBLIC_ANON_KEY');
+        const supabaseUrl = 'https://ibqvftckjsyfnyembggc.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlicXZmdGNranN5Zm55ZW1iZ2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNDI3OTUsImV4cCI6MjA5MzkxODc5NX0.EQNGQz5ckjFa-2b0sFpZ6AWhWkYDl0YP5noN7vAcGK4';
+        const sb = supabase.createClient(supabaseUrl, supabaseKey);
 
-        async function getProjects() {
-            const { data } = await supabase.from('projects').select('*');
-            const list = document.getElementById('projects-list');
+        async function loadProjects() {
+            const { data, error } = await sb.from('projects').select('*').order('id', { ascending: false });
             if(data) {
-                list.innerHTML = data.map(p => `
+                document.getElementById('projects-list').innerHTML = data.map(p => `
                     <div class="card">
                         <h3>${p.title}</h3>
                         <p>${p.desc}</p>
-                        <span class="tag">${p.tech}</span>
-                        <a href="${p.link}" class="btn" target="_blank">Download_Tool</a>
+                        <div>${p.tech ? p.tech.split(',').map(t => `<span class="tag">${t.trim()}</span>`).join('') : ''}</div>
+                        <a href="${p.link}" class="btn" target="_blank">Download Source</a>
                     </div>
                 `).join('');
             }
         }
-        getProjects();
+        loadProjects();
     </script>
 </body>
 </html>
