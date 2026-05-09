@@ -4,49 +4,55 @@ const sKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 
 function unlock() {
     const pass = document.getElementById('access-key').value;
-    if (pass === "MDaMiNeLD") {
+    if (pass === "MDaMiNeLD") { // كلمة مرورك المحدثة
         document.getElementById('login-section').classList.add('hidden');
         document.getElementById('admin-section').classList.remove('hidden');
         client = supabase.createClient(sUrl, sKey);
-        renderAdminList(); // عرض قائمة المشاريع للحذف
+        renderAdminList();
     } else {
-        alert("ACCESS DENIED!");
+        alert("كلمة مرور خاطئة!");
     }
 }
 
 async function pushData() {
-    const projectData = {
+    const status = document.getElementById('status');
+    status.innerText = "جاري النشر...";
+    
+    const { error } = await client.from('projects').insert([{
         title: document.getElementById('p-title').value,
+        type: document.getElementById('p-type').value,
         desc: document.getElementById('p-desc').value,
         link: document.getElementById('p-link').value,
-        type: document.getElementById('p-type').value, // موقع، بوت، تطبيق...
         icon_url: document.getElementById('p-icon').value,
-        tech: document.getElementById('p-tech').value
-    };
+        tech: document.getElementById('p-tech').value,
+        views: 0,
+        downloads: 0
+    }]);
 
-    const { error } = await client.from('projects').insert([projectData]);
     if (!error) {
-        alert("تم النشر بنجاح!");
-        location.reload();
+        status.style.color = "#00ff41";
+        status.innerText = "تم النشر بنجاح!";
+        renderAdminList();
     } else {
-        alert("خطأ: " + error.message);
-    }
-}
-
-async function deleteProject(id) {
-    if(confirm("هل أنت متأكد من حذف هذا المشروع نهائياً؟")) {
-        const { error } = await client.from('projects').delete().eq('id', id);
-        if(!error) location.reload();
+        status.style.color = "red";
+        status.innerText = "خطأ: " + error.message;
     }
 }
 
 async function renderAdminList() {
-    const { data } = await client.from('projects').select('*');
-    const adminList = document.getElementById('admin-list');
-    adminList.innerHTML = data.map(p => `
-        <div style="border: 1px solid #333; padding: 10px; margin-top: 10px; display: flex; justify-content: space-between;">
-            <span>${p.title} (${p.type})</span>
-            <button onclick="deleteProject(${p.id})" style="background: red; width: auto; padding: 5px 10px;">حذف</button>
+    const { data } = await client.from('projects').select('*').order('id', { ascending: false });
+    const container = document.getElementById('admin-list');
+    container.innerHTML = data.map(p => `
+        <div class="proj-item">
+            <span>${p.title} <small>(${p.type})</small></span>
+            <button class="del-btn" onclick="deleteProj(${p.id})">حذف</button>
         </div>
     `).join('');
+}
+
+async function deleteProj(id) {
+    if(confirm("هل تريد حذف هذا المشروع نهائياً؟")) {
+        const { error } = await client.from('projects').delete().eq('id', id);
+        if(!error) renderAdminList();
+    }
 }
