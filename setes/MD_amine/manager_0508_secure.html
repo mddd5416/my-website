@@ -3,147 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الإدارة </title>
+    <title>ROOT Control Panel</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="manager-style.css">
-</head>
-<body class="light-mode" id="body-root">
+    <style>
+        :root { --accent: #3b82f6; --bg: #f8fafc; --sidebar: #ffffff; --text: #1e293b; --border: #e2e8f0; --card: #ffffff; }
+        [data-theme="dark"] { --bg: #0f172a; --sidebar: #1e293b; --text: #f1f5f9; --border: #334155; --card: #1e293b; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
-    <div id="login-overlay" class="overlay">
-        <div class="auth-box">
-            <h2>تسجيل دخول الإدارة</h2>
-            <input type="text" id="user-in" placeholder="اسم المستخدم">
-            <input type="password" id="pass-in" placeholder="كلمة المرور">
-            <button class="btn-main" onclick="app.login()">دخول</button>
+        /* طبقة الدخول */
+        #auth-layer { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .auth-card { background: var(--card); padding: 40px; border-radius: 16px; border: 1px solid var(--border); width: 100%; max-width: 380px; text-align: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+
+        /* الهيكل الرئيسي */
+        #main-app { display: none; grid-template-columns: 280px 1fr; height: 100vh; }
+        .sidebar { background: var(--sidebar); border-left: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
+        .sidebar-profile { padding: 30px 20px; text-align: center; border-bottom: 1px solid var(--border); }
+        .avatar-wrapper { position: relative; width: 90px; height: 90px; margin: 0 auto 15px; cursor: pointer; transition: 0.3s; }
+        .avatar-wrapper:hover { transform: scale(1.05); }
+        .avatar-wrapper img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); }
+        .avatar-wrapper span { position: absolute; bottom: 0; right: 0; background: var(--accent); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+        .nav-btn { padding: 14px 24px; margin: 4px 12px; border: none; background: transparent; color: var(--text); cursor: pointer; text-align: right; border-radius: 12px; font-weight: 500; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
+        .nav-btn.active { background: var(--accent); color: white; }
+        .nav-btn:hover:not(.active) { background: var(--border); }
+
+        .workspace { padding: 40px; overflow-y: auto; background: var(--bg); scroll-behavior: smooth; }
+        .panel { display: none; max-width: 900px; margin: 0 auto; animation: fadeInUp 0.4s ease; }
+        .panel.active { display: block; }
+
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        input, textarea { width: 100%; padding: 12px 16px; margin: 8px 0 20px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); outline: none; }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        .primary-btn { background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; transition: 0.3s; }
+        
+        .project-row { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--border); transition: 0.2s; }
+        .project-row:hover { background: var(--bg); }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 768px) { #main-app { grid-template-columns: 1fr; } .sidebar { display: none; } }
+    </style>
+</head>
+<body>
+
+    <div id="auth-layer">
+        <div class="auth-card">
+            <h2 style="margin-bottom: 8px;">دخول المشرف</h2>
+            <p style="color: #64748b; margin-bottom: 30px;">أدخل بيانات الاعتماد للوصول</p>
+            <input type="text" id="log-u" placeholder="اسم المستخدم">
+            <input type="password" id="log-p" placeholder="كلمة المرور">
+            <button class="primary-btn" id="do-login">تسجيل الدخول</button>
         </div>
     </div>
 
-    <div id="app-wrapper" style="display: none;">
-        <aside id="main-sidebar" class="sidebar">
-            <div class="sidebar-top">
-                <div class="profile-trigger" onclick="app.showProfile()">
-                    <img id="side-avatar" src="https://via.placeholder.com/80" alt="Profile">
+    <div id="main-app">
+        <aside class="sidebar">
+            <div class="sidebar-profile">
+                <div class="avatar-wrapper" id="change-avatar-trigger">
+                    <img id="admin-img" src="https://via.placeholder.com/90">
+                    <span>✎</span>
                 </div>
-                <nav class="nav-menu">
-                    <button class="nav-link active" onclick="app.setTab('publish')"><span>➕</span> إضافة مشروع</button>
-                    <button class="nav-link" onclick="app.setTab('manage')"><span>🛠</span> التحكم والعديل</button>
-                    <button class="nav-link" onclick="app.setTab('stats')"><span>📈</span> مستوى التقدم</button>
-                </nav>
+                <input type="file" id="f-avatar" hidden accept="image/*">
+                <h3 id="display-name" style="margin: 0; font-size: 18px;">محمد أمين</h3>
             </div>
-            <div class="sidebar-bottom">
-                <button class="nav-link" onclick="app.setTab('settings')"><span>⚙️</span> الإعدادات</button>
+            <nav style="flex:1; padding-top: 20px;">
+                <button class="nav-btn active" onclick="uiNav('p-add', this)"><span>📁</span> مشروع جديد</button>
+                <button class="nav-btn" onclick="uiNav('p-manage', this)"><span>🛠</span> إدارة الأعمال</button>
+                <button class="nav-btn" onclick="uiNav('p-stats', this)"><span>📊 الإحصائيات</span></button>
+                <button class="nav-btn" onclick="uiNav('p-settings', this)"><span>⚙️ الإعدادات</span></button>
+            </nav>
+            <div style="padding: 20px;">
+                <button class="primary-btn" style="background:#ef4444" onclick="location.reload()">خروج</button>
             </div>
         </aside>
 
-        <div id="profile-view" class="profile-center-view" style="display: none;">
-            <button class="btn-back" onclick="app.hideProfile()">⬅ العودة للوحة التحكم</button>
-            <div class="profile-card">
-                <div class="avatar-edit">
-                    <img id="large-avatar" src="https://via.placeholder.com/120">
-                    <button class="edit-icon" onclick="document.getElementById('file-avatar').click()">✎</button>
-                    <input type="file" id="file-avatar" hidden onchange="app.updateAvatar(this)">
-                </div>
-                
-                <div class="info-group">
-                    <label>الاسم المستعار</label>
-                    <div class="input-with-btn">
-                        <input type="text" id="prof-name" readonly>
-                        <button onclick="app.toggleEdit('prof-name')">✎</button>
-                    </div>
-                </div>
-
-                <div class="info-group">
-                    <label>اسم المستخدم</label>
-                    <div class="input-with-btn">
-                        <input type="text" id="prof-user" readonly>
-                        <button onclick="app.toggleEdit('prof-user')">✎</button>
-                    </div>
-                </div>
-
-                <div class="info-group">
-                    <label>الوصف الشخصي</label>
-                    <div class="input-with-btn">
-                        <textarea id="prof-bio" readonly></textarea>
-                        <button onclick="app.toggleEdit('prof-bio')">✎</button>
-                    </div>
-                </div>
-
-                <button class="btn-outline" onclick="app.changePasswordPrompt()">تغيير كلمة السر</button>
-            </div>
-        </div>
-
-        <main id="content-area" class="workspace">
-            
-            <section id="tab-publish" class="panel active">
+        <main class="workspace">
+            <section id="p-add" class="panel active">
                 <div class="card">
-                    <h2 id="form-title">نشر تطبيق جديد</h2>
-                    <input type="hidden" id="edit-id">
+                    <h3 id="form-mode-title">إضافة تطبيق إلى المتجر</h3>
+                    <input type="hidden" id="edit-target-id">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                        <input type="text" id="p-title" placeholder="اسم المشروع">
+                        <input type="text" id="p-type" placeholder="نوع المنصة (Android, Windows...)">
+                    </div>
+                    <textarea id="p-desc" placeholder="شرح موجز عن مميزات التطبيق..." rows="4"></textarea>
                     
-                    <div class="grid-2">
-                        <input type="text" id="p-title" placeholder="اسم التطبيق">
-                        <input type="text" id="p-type" placeholder="نوع المنصة">
-                    </div>
-                    <textarea id="p-desc" placeholder="وصف التطبيق..." rows="3"></textarea>
-
-                    <div class="upload-section">
-                        <label>أيقونة التطبيق الرئيسي:</label>
-                        <input type="file" id="p-icon" class="file-input">
-                    </div>
-
-                    <div class="upload-section">
-                        <label>سكرينشوتات من داخل التطبيق:</label>
-                        <input type="file" id="p-screens" class="file-input" multiple onchange="app.previewScreens(this)">
-                        <div id="screens-preview-box" class="preview-grid"></div>
-                    </div>
-
-                    <div id="links-wrapper">
-                        <label>أزرار التحميل:</label>
-                        <div class="link-row">
-                            <input type="text" class="l-url" placeholder="الرابط">
-                            <input type="text" class="l-txt" placeholder="اسم الزر">
-                            <button class="btn-add-mini" onclick="app.addLinkRow()">+</button>
+                    <label>أيقونة التطبيق:</label>
+                    <input type="file" id="f-icon">
+                    
+                    <div id="links-container">
+                        <label>روابط التحميل المتاحة:</label>
+                        <div style="display:flex; gap:10px; margin-bottom:10px;">
+                            <input type="text" class="l-url" placeholder="الرابط المباشر">
+                            <input type="text" class="l-txt" placeholder="نص الزر">
+                            <button class="primary-btn" style="width:50px" onclick="uiAddLink()">+</button>
                         </div>
                     </div>
-
-                    <button class="btn-main" style="width: 100%; margin-top: 20px;" onclick="app.saveProject()">حفظ ونشر المشروع</button>
+                    <button class="primary-btn" id="do-publish" style="margin-top:20px;">حفظ وتثبيت المنشور</button>
                 </div>
             </section>
 
-            <section id="tab-manage" class="panel">
+            <section id="p-manage" class="panel">
                 <div class="card">
-                    <h3>إدارة المنشورات الحالية</h3>
-                    <div id="projects-list-admin"></div>
+                    <h3>قائمة مشاريعك</h3>
+                    <div id="list-holder"></div>
                 </div>
             </section>
 
-            <section id="tab-stats" class="panel">
-                <div class="stats-grid">
-                    <div class="stat-card"> <h1 id="stat-views">0</h1> <p>إجمالي المشاهدات</p> </div>
-                    <div class="stat-card"> <h1 id="stat-dl">0</h1> <p>إجمالي التحميلات</p> </div>
-                </div>
-            </section>
-
-            <section id="tab-settings" class="panel">
-                <div class="card">
-                    <h3>التخصيص</h3>
-                    <div class="setting-row">
-                        <span>المظهر الداكن</span>
-                        <input type="checkbox" onchange="app.toggleDarkMode(this)">
+            <section id="p-stats" class="panel">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                    <div class="card" style="text-align:center;">
+                        <h1 id="v-count" style="color:var(--accent); font-size:40px;">0</h1>
+                        <p>مشاهدة إجمالية</p>
                     </div>
-                    <div class="setting-row">
-                        <span>اللغة</span>
-                        <select onchange="app.changeLang(this.value)">
-                            <option value="ar">العربية</option>
-                            <option value="en">English</option>
-                        </select>
+                    <div class="card" style="text-align:center;">
+                        <h1 id="d-count" style="color:var(--accent); font-size:40px;">0</h1>
+                        <p>تحميل إجمالي</p>
                     </div>
                 </div>
             </section>
 
+            <section id="p-settings" class="panel">
+                <div class="card">
+                    <h3>إعدادات الأمان والحساب</h3>
+                    <input type="text" id="set-name" placeholder="الاسم الظاهر">
+                    <input type="text" id="set-user" placeholder="اسم المستخدم (Login)">
+                    <input type="password" id="set-pass" placeholder="كلمة المرور الجديدة">
+                    <button class="primary-btn" id="do-update-set">تحديث البيانات</button>
+                </div>
+            </section>
         </main>
     </div>
-
     <script src="Mscript.js"></script>
 </body>
 </html>
