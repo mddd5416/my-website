@@ -12,45 +12,50 @@
         body { background: var(--bg); color: var(--text); font-family: 'Google Sans', sans-serif; transition: 0.3s; margin: 0; overflow-x: hidden; }
         header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
 
-        .main-layout { display: flex; height: calc(100vh - 70px); }
-        .projects-grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; overflow-y: auto; }
+        .main-layout { display: flex; height: calc(100vh - 70px); transition: 0.5s ease; }
+        .projects-grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; overflow-y: auto; transition: 0.5s ease; }
         
-        /* حل مشكلة خروج النص بالحرف */
+        /* منع خروج النص */
         .card { 
             background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; 
             cursor: pointer; transition: 0.3s; height: fit-content; 
             word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;
         }
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
         .card h3 { margin: 0 0 10px 0; color: var(--accent); }
-        .card p { font-size: 14px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .card p { font-size: 14px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; color: #888; }
         
-        /* واجهة العرض الجانبي المتطورة */
-        #detail-view { flex: 1; background: var(--card); border-right: 1px solid var(--border); padding: 40px; display: none; overflow-y: auto; animation: slideIn 0.5s ease; }
+        /* واجهة العرض الجانبي (نظام النصفين) */
+        #detail-view { 
+            flex: 0 0 40%; background: var(--card); border-right: 1px solid var(--border); 
+            padding: 40px; display: none; overflow-y: auto; animation: slideIn 0.5s ease;
+            word-wrap: break-word; overflow-wrap: break-word;
+        }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        .screenshot-gallery { display: flex; gap: 10px; overflow-x: auto; margin: 20px 0; padding-bottom: 10px; }
-        .screenshot-gallery img { height: 220px; border-radius: 12px; border: 1px solid var(--border); flex-shrink: 0; transition: 0.3s; }
-        .screenshot-gallery img:hover { transform: scale(1.02); }
-        .close-btn { font-size: 20px; cursor: pointer; color: var(--accent); font-weight: bold; margin-bottom: 20px; display: inline-block; }
+        .screenshot-gallery { display: flex; gap: 10px; overflow-x: auto; margin: 20px 0; padding-bottom: 10px; scrollbar-width: thin; }
+        .screenshot-gallery img { height: 220px; border-radius: 12px; border: 1px solid var(--border); flex-shrink: 0; transition: 0.3s; cursor: zoom-in; }
+        .close-btn { font-size: 18px; cursor: pointer; color: var(--accent); font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+        
+        .btn-main { background: var(--accent); color: white; border: none; padding: 12px 25px; border-radius: 12px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
     </style>
 </head>
 <body data-theme="dark">
     <header>
         <div style="display:flex; align-items:center; gap:12px;">
-            <img id="header-avatar" src="" style="width:38px; height:38px; border-radius:50%; background: #333; object-fit: cover;">
+            <img id="header-avatar" src="https://via.placeholder.com/38" style="width:38px; height:38px; border-radius:50%; object-fit: cover;">
             <span id="admin-name-display" style="font-weight: bold;">محمد أمين</span>
         </div>
-        <button onclick="toggleTheme()" style="background: var(--accent); color: white; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer;">الكلار / السومبر</button>
+        <button onclick="toggleTheme()" id="theme-toggle-btn" style="background: var(--accent); color: white; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer;">الوضع الفاتح</button>
     </header>
 
     <div class="main-layout">
         <div id="detail-view">
-            <span class="close-btn" onclick="closeDetail()">← عودة للمشاريع</span>
+            <span class="close-btn" onclick="closeDetail()">🔙 العودة للمشاريع</span>
             <div id="detail-content"></div>
         </div>
         <div class="projects-grid" id="projects-list">
-            <!-- سيتم جلب المشاريع عبر Uscript.js -->
-        </div>
+            </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -58,8 +63,10 @@
     <script>
         function toggleTheme() {
             const body = document.body;
-            const theme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            body.setAttribute('data-theme', theme);
+            const btn = document.getElementById('theme-toggle-btn');
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            btn.innerText = isDark ? 'الوضع المظلم' : 'الوضع الفاتح';
         }
     </script>
 </body>
