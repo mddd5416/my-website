@@ -2,297 +2,100 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Google Admin Console | محمد أمين</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم | محمد أمين</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --google-blue: #1a73e8;
-            --google-red: #ea4335;
-            --google-gray: #5f6368;
-            --bg-color: #ffffff;
-            --sidebar-bg: #ffffff;
-            --card-bg: #ffffff;
-            --text-main: #202124;
-            --border-color: #dadce0;
-            --nav-hover: #f1f3f4;
-        }
+        :root { --g-blue: #1a73e8; --g-red: #ea4335; --g-gray: #5f6368; --bg: #ffffff; --border: #dadce0; --card: #ffffff; }
+        [data-theme="dark"] { --bg: #202124; --card: #292a2d; --border: #3c4043; }
+        * { box-sizing: border-box; font-family: 'Google Sans', sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--g-gray); height: 100vh; overflow: hidden; }
+        
+        #auth-layer { position: fixed; inset: 0; background: #fff; z-index: 1000; display: flex; align-items: center; justify-content: center; text-align: center; }
+        #main-app { display: none; grid-template-columns: 280px 1fr; height: 100vh; }
+        
+        .sidebar { background: var(--card); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+        .sidebar-user { padding: 30px 20px; text-align: center; border-bottom: 1px solid var(--border); }
+        .avatar-box { position: relative; width: 85px; height: 85px; margin: 0 auto 10px; cursor: pointer; border: 3px solid var(--g-blue); border-radius: 50%; overflow: hidden; }
+        .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .nav-item { padding: 14px 24px; margin: 4px 8px; border: none; background: transparent; cursor: pointer; text-align: right; border-radius: 0 25px 25px 0; font-weight: 500; transition: 0.2s; }
+        .nav-item.active { background: #e8f0fe; color: var(--g-blue); }
 
-        [data-theme="dark"] {
-            --bg-color: #202124;
-            --sidebar-bg: #202124;
-            --card-bg: #292a2d;
-            --text-main: #e8eaed;
-            --border-color: #3c4043;
-            --nav-hover: #3c4043;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Google Sans', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            overflow: hidden; /* إزالة السكرول المزعج من الجسم */
-            height: 100vh;
-        }
-
-        /* الهيكل الأساسي */
-        #main-app {
-            display: none;
-            grid-template-columns: 280px 1fr;
-            height: 100vh;
-        }
-
-        /* السايد بار بستايل جوجل */
-        .sidebar {
-            background: var(--sidebar-bg);
-            border-left: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            padding: 20px 0;
-        }
-
-        .profile-card {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 10px;
-        }
-
-        .avatar-container {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-        }
-
-        .avatar-container img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--google-blue);
-        }
-
-        .avatar-edit-hint {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: var(--google-blue);
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .nav-item {
-            padding: 12px 24px;
-            margin: 4px 8px;
-            border-radius: 0 25px 25px 0; /* شكل جوجل الشهير */
-            border: none;
-            background: transparent;
-            color: var(--google-gray);
-            cursor: pointer;
-            text-align: right;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: 0.2s;
-        }
-
-        .nav-item.active {
-            background-color: #e8f0fe;
-            color: var(--google-blue);
-        }
-
-        /* مساحة العمل */
-        .workspace {
-            padding: 30px;
-            overflow-y: auto; /* السكرول فقط هنا داخل المحتوى */
-            background: var(--bg-color);
-        }
-
-        .panel { display: none; max-width: 900px; margin: 0 auto; }
+        .workspace { padding: 30px; overflow-y: auto; height: 100vh; }
+        .panel { display: none; max-width: 900px; margin: 0 auto; animation: fadeIn 0.3s ease; }
         .panel.active { display: block; }
 
-        .google-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: none;
-            margin-bottom: 24px;
-        }
-
-        h3 { margin-top: 0; font-weight: 500; font-size: 18px; }
-
-        /* مدخلات جوجل المريحة */
-        input, textarea, select {
-            width: 100%;
-            padding: 12px 16px;
-            margin: 8px 0 20px 0;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            background: transparent;
-            color: var(--text-main);
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-
-        input:focus { border: 2px solid var(--google-blue); outline: none; }
-
-        .btn-google {
-            background-color: var(--google-blue);
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 4px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: box-shadow 0.2s;
-        }
-
-        .btn-google:hover { box-shadow: 0 1px 3px rgba(60,64,67,0.3); }
-
-        /* شاشة الدخول */
-        #auth-layer {
-            position: fixed;
-            inset: 0;
-            background: #fff;
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* الصور والمعاينة */
-        .preview-box { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-        .img-thumb {
-            width: 100px;
-            height: 100px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            position: relative;
-        }
-        .img-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
-        .remove-btn {
-            position: absolute;
-            top: -8px;
-            left: -8px;
-            background: var(--google-red);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-        }
+        .g-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0 20px; border: 1px solid var(--border); border-radius: 8px; }
+        .btn-g { background: var(--g-blue); color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        
+        .project-item { display: flex; align-items: center; justify-content: space-between; padding: 15px; border-bottom: 1px solid var(--border); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
     </style>
 </head>
 <body>
-
     <div id="auth-layer">
-        <div style="width: 350px; text-align: center;">
-            <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" width="120" alt="Google">
-            <h2 style="font-weight: 400; margin-top: 20px;">تسجيل الدخول</h2>
-            <p style="color: var(--google-gray); margin-bottom: 30px;">استخدم حساب المشرف الخاص بك</p>
-            <input type="text" id="login-u" placeholder="البريد الإلكتروني أو الهاتف">
+        <div>
+            <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" width="100">
+            <h3>تسجيل دخول المدير</h3>
+            <input type="text" id="login-u" placeholder="اسم المستخدم">
             <input type="password" id="login-p" placeholder="كلمة المرور">
-            <div style="text-align: left; margin-top: 20px;">
-                <button class="btn-google" id="btn-login">التالي</button>
-            </div>
+            <button class="btn-g" style="width:100%" id="btn-login-exec">دخول</button>
         </div>
     </div>
 
     <div id="main-app">
         <aside class="sidebar">
-            <div class="profile-card">
-                <div class="avatar-container" onclick="document.getElementById('f-avatar').click()">
-                    <img id="admin-avatar" src="https://via.placeholder.com/80">
-                    <div class="avatar-edit-hint">✎</div>
+            <div class="sidebar-user">
+                <div class="avatar-box" id="avatar-trigger">
+                    <img id="admin-avatar" src="https://via.placeholder.com/85">
                 </div>
-                <h3 id="admin-display-name" style="margin: 10px 0 5px 0;">...</h3>
                 <input type="file" id="f-avatar" hidden accept="image/*">
+                <h4 id="admin-name-display" style="margin:5px 0 0">محمد أمين</h4>
             </div>
-            
-            <nav>
-                <button class="nav-item active" onclick="uiNav('view-post', this)">📑 المشاريع</button>
-                <button class="nav-item" onclick="uiNav('view-user', this)">⚙️ الإعدادات</button>
-                <button class="nav-item" onclick="uiNav('view-stats', this)">📈 التقارير</button>
+            <nav style="flex:1">
+                <button class="nav-item active" onclick="uiTab('view-add', this)">➕ إضافة جديد</button>
+                <button class="nav-item" onclick="uiTab('view-list', this)">🛠 إدارة المنشورات</button>
+                <button class="nav-item" onclick="uiTab('view-set', this)">⚙️ الإعدادات</button>
             </nav>
         </aside>
-
         <main class="workspace">
-            <section id="view-post" class="panel active">
-                <div class="google-card">
-                    <h3>إنشاء مشروع جديد</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div>
-                            <label>اسم المشروع</label>
-                            <input type="text" id="p-title">
-                        </div>
-                        <div>
-                            <label>التصنيف</label>
-                            <input type="text" id="p-type">
-                        </div>
-                    </div>
-
-                    <label>الوصف</label>
-                    <textarea id="p-desc" rows="4"></textarea>
-
-                    <label>أيقونة المشروع</label>
-                    <input type="file" id="f-icon" hidden>
-                    <button type="button" class="btn-google" style="background:#f1f3f4; color:#3c4043; margin-bottom:15px;" onclick="document.getElementById('f-icon').click()">اختيار صورة</button>
-                    <div id="prev-icon" class="preview-box"></div>
-
-                    <label>صور المعرض</label>
-                    <input type="file" id="f-screens" hidden multiple>
-                    <button type="button" class="btn-google" style="background:#f1f3f4; color:#3c4043; margin-bottom:15px;" onclick="document.getElementById('f-screens').click()">إضافة لقطات شاشة</button>
-                    <div id="prev-screens" class="preview-box"></div>
-
+            <section id="view-add" class="panel active">
+                <div class="g-card">
+                    <h3 id="form-title">نشر تطبيق جديد</h3>
+                    <input type="hidden" id="edit-id">
+                    <input type="text" id="p-title" placeholder="اسم التطبيق">
+                    <input type="text" id="p-type" placeholder="التصنيف (مثال: برامج ويندوز)">
+                    <textarea id="p-desc" placeholder="وصف موجز للمشروع..." rows="4"></textarea>
+                    <label>الأيقونة:</label> <input type="file" id="f-icon">
                     <div id="links-area">
-                        <label>روابط التحميل</label>
+                        <label>الروابط:</label>
                         <div style="display:flex; gap:10px;">
-                            <input type="text" class="l-url" placeholder="URL">
-                            <input type="text" class="l-txt" placeholder="Label">
-                            <button class="btn-google" onclick="uiAddLink()">+</button>
+                            <input type="text" class="l-url" placeholder="رابط التحميل">
+                            <input type="text" class="l-txt" placeholder="نص الزر">
                         </div>
                     </div>
-
-                    <hr style="border:0; border-top:1px solid var(--border-color); margin:20px 0;">
-                    <button id="pub-btn" class="btn-google">نشر المشروع</button>
+                    <button class="btn-g" style="width:100%; margin-top:20px;" id="btn-pub-exec">حفظ ونشر</button>
                 </div>
             </section>
-
-            <section id="view-user" class="panel">
-                <div class="google-card">
-                    <h3>معلومات الحساب</h3>
-                    <input type="text" id="up-name" placeholder="الاسم الكامل">
-                    <input type="text" id="up-user" placeholder="اسم المستخدم">
+            <section id="view-list" class="panel">
+                <div class="g-card">
+                    <h3>كل المنشورات</h3>
+                    <div id="manager-list"></div>
+                </div>
+            </section>
+            <section id="view-set" class="panel">
+                <div class="g-card">
+                    <h3>تحديث الحساب</h3>
+                    <input type="text" id="up-name" placeholder="الاسم الجديد">
                     <input type="password" id="up-pass" placeholder="كلمة مرور جديدة">
-                    <button class="btn-google" onclick="engineUpdateProfile()">تحديث الحساب</button>
-                </div>
-            </section>
-
-            <section id="view-stats" class="panel">
-                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
-                    <div class="google-card" style="text-align:center;">
-                        <div style="color: var(--google-gray); font-size:12px; text-transform:uppercase;">المشاهدات</div>
-                        <div id="stat-v" style="font-size:32px; color:var(--google-blue); font-weight:500;">0</div>
-                    </div>
-                    <div class="google-card" style="text-align:center;">
-                        <div style="color: var(--google-gray); font-size:12px; text-transform:uppercase;">التحميلات</div>
-                        <div id="stat-d" style="font-size:32px; color:var(--google-blue); font-weight:500;">0</div>
-                    </div>
+                    <button class="btn-g" id="btn-up-exec">تحديث البيانات</button>
                 </div>
             </section>
         </main>
     </div>
-
-    <script src="Mscript.js"></script>
+    <script src="manager.js"></script>
 </body>
 </html>
