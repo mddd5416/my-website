@@ -1,153 +1,137 @@
-// [1] الإعدادات الأساسية
-const supabaseUrl = 'https://ibqvftckjsyfnyembggc.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlicXZmdGNranN5Zm55ZW1iZ2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNDI3OTUsImV4cCI6MjA5MzkxODc5NX0.EQNGQz5ckjFa-2b0sFpZ6AWhWkYDl0YP5noN7vAcGK4';
-const sb = supabase.createClient(supabaseUrl, supabaseKey);
+// التكوين الرئيسي
+const config = {
+    url: 'https://ibqvftckjsyfnyembggc.supabase.co',
+    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlicXZmdGNranN5Zm55ZW1iZ2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNDI3OTUsImV4cCI6MjA5MzkxODc5NX0.EQNGQz5ckjFa-2b0sFpZ6AWhWkYDl0YP5noN7vAcGK4'
+};
+const sb = supabase.createClient(config.url, config.key);
 
-let selectedIconFile = null;
-let selectedScreensFiles = [];
+let fileStore = { icon: null, screens: [] };
 
-// [2] نظام الدخول
-function handleAuth() {
-    const u = document.getElementById('auth-user').value;
-    const p = document.getElementById('auth-pass').value;
+// --- [ منطق الدخول ] ---
+function engineLogin() {
+    const u = document.getElementById('input-user').value;
+    const p = document.getElementById('input-pass').value;
     const sU = localStorage.getItem('admin_user') || "admin";
     const sP = localStorage.getItem('admin_pass') || "MDaMiNeLD";
 
     if (u === sU && p === sP) {
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('main-wrapper').style.display = 'grid';
-        logicLoadData();
+        document.getElementById('auth-layer').style.display = 'none';
+        const app = document.getElementById('main-app');
+        app.style.visibility = 'visible';
+        app.style.opacity = '1';
+        engineLoadData();
     } else {
-        alert("بيانات الدخول غير صحيحة!");
+        alert("فشل في المصادقة: البيانات غير صحيحة");
     }
 }
 
-// [3] إدارة الصور والمعاينة
-function uiPreviewIcon(input) {
-    if (input.files[0]) {
-        selectedIconFile = input.files[0];
-        const r = new FileReader();
-        r.onload = e => {
-            document.getElementById('zone-icon-preview').innerHTML = `
-                <div class="thumb-box">
-                    <img src="${e.target.result}">
-                    <button class="x-del" onclick="selectedIconFile=null; document.getElementById('zone-icon-preview').innerHTML=''">×</button>
-                </div>`;
-        };
-        r.readAsDataURL(selectedIconFile);
+// --- [ منطق المعاينة الذكي ] ---
+function uiPreview(input, boxId, isMulti) {
+    const box = document.getElementById(boxId);
+    if (!isMulti) {
+        fileStore.icon = input.files[0];
+        box.innerHTML = renderImg(URL.createObjectURL(fileStore.icon), `fileStore.icon=null; document.getElementById('${boxId}').innerHTML=''`);
+    } else {
+        const files = Array.from(input.files);
+        files.forEach(f => {
+            const id = Math.random().toString(36).substr(2, 9);
+            fileStore.screens.push({ id, file: f });
+            const url = URL.createObjectURL(f);
+            box.innerHTML += `<div class="img-item" id="${id}">${renderImg(url, `engineKillScreen('${id}')`)}</div>`;
+        });
     }
 }
 
-function uiPreviewScreens(input) {
-    const files = Array.from(input.files);
-    selectedScreensFiles = selectedScreensFiles.concat(files);
-    uiRenderScreens();
+function renderImg(url, delAction) {
+    return `<img src="${url}"><button class="btn-kill" onclick="${delAction}">×</button>`;
 }
 
-function uiRenderScreens() {
-    const zone = document.getElementById('zone-screens-preview');
-    zone.innerHTML = "";
-    selectedScreensFiles.forEach((file, index) => {
-        const r = new FileReader();
-        r.onload = e => {
-            zone.innerHTML += `
-                <div class="thumb-box">
-                    <img src="${e.target.result}">
-                    <button class="x-del" onclick="selectedScreensFiles.splice(${index},1); uiRenderScreens()">×</button>
-                </div>`;
-        };
-        r.readAsDataURL(file);
-    });
+function engineKillScreen(id) {
+    fileStore.screens = fileStore.screens.filter(s => s.id !== id);
+    document.getElementById(id).remove();
 }
 
-function uiAddLinkRow() {
+function uiAddLink() {
     const div = document.createElement('div');
     div.style.display = "flex"; div.style.gap = "10px"; div.style.marginBottom = "10px";
-    div.innerHTML = `<input type="text" class="url-input" placeholder="رابط التحميل"><input type="text" class="txt-input" placeholder="نص الزر"><button onclick="this.parentElement.remove()" style="background:red; border:none; border-radius:10px; color:white; width:50px;">-</button>`;
-    document.getElementById('container-links').appendChild(div);
+    div.innerHTML = `<input type="text" class="link-src" placeholder="الرابط"><input type="text" class="link-label" placeholder="نص الزر"><button onclick="this.parentElement.remove()" style="background:red; color:white; width:50px;">-</button>`;
+    document.getElementById('dynamic-links').appendChild(div);
 }
 
-// [4] عملية الرفع والنشر المضمونة
-async function logicPublish() {
-    const btn = document.getElementById('btn-publish-final');
-    btn.disabled = true; btn.innerText = "جاري رفع الملفات...";
+// --- [ محرك الرفع والنشر ] ---
+async function enginePublish() {
+    const btn = document.getElementById('submit-project');
+    btn.disabled = true; btn.innerText = "جاري معالجة البيانات...";
 
     try {
-        let finalIconUrl = document.getElementById('in-project-icon-url').value;
-        if (selectedIconFile) finalIconUrl = await logicUpload(selectedIconFile);
+        let iconUrl = document.getElementById('post-icon-url').value;
+        if (fileStore.icon) iconUrl = await engineUpload(fileStore.icon);
         
-        const finalScreensUrls = [];
-        for (let f of selectedScreensFiles) {
-            finalScreensUrls.push(await logicUpload(f));
-        }
+        const screenUrls = [];
+        for (let s of fileStore.screens) screenUrls.push(await engineUpload(s.file));
 
-        const urls = Array.from(document.querySelectorAll('.url-input')).map(i => i.value);
-        const txts = Array.from(document.querySelectorAll('.txt-input')).map(i => i.value);
+        const links = Array.from(document.querySelectorAll('.link-src')).map(i => i.value);
+        const labels = Array.from(document.querySelectorAll('.link-label')).map(i => i.value);
 
         const { error } = await sb.from('projects').insert([{
-            title: document.getElementById('in-project-title').value,
-            type: document.getElementById('in-project-type').value,
-            "desc": document.getElementById('in-project-desc').value,
-            icon_url: finalIconUrl,
-            screenshots: finalScreensUrls,
-            link: urls[0] || "#",
-            btn_text: txts[0] || "تحميل",
-            extra_links: { urls, texts: txts }
+            title: document.getElementById('post-title').value,
+            type: document.getElementById('post-type').value,
+            "desc": document.getElementById('post-desc').value,
+            icon_url: iconUrl,
+            screenshots: screenUrls,
+            link: links[0] || "#",
+            btn_text: labels[0] || "تحميل",
+            extra_links: { urls: links, texts: labels }
         }]);
 
         if (error) throw error;
-        alert("أخيراً! تم النشر بنجاح");
+        alert("تم النشر بنجاح!");
         location.reload();
-
     } catch (e) {
-        alert("خطأ أثناء النشر: " + e.message);
-        btn.disabled = false; btn.innerText = "🚀 إعادة المحاولة";
+        alert("خطأ تقني: " + e.message);
+        btn.disabled = false; btn.innerText = "إعادة المحاولة";
     }
 }
 
-async function logicUpload(file) {
-    const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
-    const { data, error } = await sb.storage.from('media').upload(fileName, file);
+async function engineUpload(file) {
+    const path = `media/${Date.now()}_${file.name}`;
+    const { error } = await sb.storage.from('media').upload(path, file);
     if (error) throw error;
-    return sb.storage.from('media').getPublicUrl(fileName).data.publicUrl;
+    return sb.storage.from('media').getPublicUrl(path).data.publicUrl;
 }
 
-// [5] البروفايل والإحصائيات
-async function logicUpdateProfile() {
-    const n = document.getElementById('up-display-name').value;
-    const u = document.getElementById('up-username').value;
-    const p = document.getElementById('up-password').value;
-    const f = document.getElementById('up-avatar-file').files[0];
-
-    if (n) localStorage.setItem('md_name', n);
-    if (u) localStorage.setItem('admin_user', u);
-    if (p) localStorage.setItem('admin_pass', p);
-    if (f) localStorage.setItem('md_avatar', await logicUpload(f));
-    
-    alert("تم تحديث البيانات بنجاح!");
-    location.reload();
-}
-
-function logicLoadData() {
-    document.getElementById('display-name').innerText = localStorage.getItem('md_name') || "محمد أمين";
-    document.getElementById('display-avatar').src = localStorage.getItem('md_avatar') || "https://via.placeholder.com/90";
+// --- [ منطق البيانات والواجهة ] ---
+function engineLoadData() {
+    document.getElementById('admin-nick').innerText = localStorage.getItem('md_name') || "محمد أمين";
+    document.getElementById('admin-img').src = localStorage.getItem('md_avatar') || "https://via.placeholder.com/90";
     
     sb.from('projects').select('views, downloads').then(({data}) => {
         if (data) {
-            document.getElementById('stat-views').innerText = data.reduce((s, p) => s + (p.views || 0), 0);
-            document.getElementById('stat-downloads').innerText = data.reduce((s, p) => s + (p.downloads || 0), 0);
+            document.getElementById('stat-v').innerText = data.reduce((a, b) => a + (b.views || 0), 0);
+            document.getElementById('stat-d').innerText = data.reduce((a, b) => a + (b.downloads || 0), 0);
         }
     });
 }
 
-function switchTab(id, btn) {
-    document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+function uiNavigate(id, btn) {
+    document.querySelectorAll('.panel-view').forEach(p => p.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 }
 
 function uiToggleTheme() {
     const b = document.body;
     b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+}
+
+function engineUpdateProfile() {
+    const n = document.getElementById('new-nick').value;
+    const u = document.getElementById('new-user').value;
+    const p = document.getElementById('new-pass').value;
+    if (n) localStorage.setItem('md_nick', n);
+    if (u) localStorage.setItem('admin_user', u);
+    if (p) localStorage.setItem('admin_pass', p);
+    alert("تم التحديث بنجاح!");
+    location.reload();
 }
