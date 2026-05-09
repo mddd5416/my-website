@@ -2,130 +2,99 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROOT Panel | محمد أمين</title>
+    <title>لوحة التحكم | محمد أمين</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --bg: #0b0b14; --card: #12121f; --accent: #3699ff; --text: #ffffff; --border: #242435; }
-        [data-theme="light"] { --bg: #f4f6f9; --card: #ffffff; --accent: #007bff; --text: #1d1d1f; --border: #dee2e6; }
+        body { margin: 0; font-family: sans-serif; background: var(--bg); color: var(--text); direction: rtl; }
         
-        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
-
-        /* طبقة الدخول المحصنة */
-        #auth-layer { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .auth-box { background: var(--card); padding: 40px; border-radius: 24px; border: 1px solid var(--border); width: 100%; max-width: 360px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
-
-        /* هيكل اللوحة الرئيسي */
-        #main-app { display: grid; grid-template-columns: 280px 1fr; height: 100vh; visibility: hidden; opacity: 0; transition: opacity 0.4s ease; }
+        /* شاشة الدخول */
+        #auth-layer { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .auth-box { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid var(--border); width: 300px; text-align: center; }
         
-        .sidebar { background: var(--card); border-left: 1px solid var(--border); padding: 30px; display: flex; flex-direction: column; }
-        .profile-section { text-align: center; margin-bottom: 40px; }
-        .profile-section img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--accent); margin-bottom: 12px; object-fit: cover; }
-
-        .nav-btn { padding: 14px 20px; margin: 6px 0; border: none; border-radius: 14px; background: transparent; color: #7e8299; cursor: pointer; text-align: right; font-weight: 600; transition: 0.2s; }
-        .nav-btn.active, .nav-btn:hover { background: #1b1b2e; color: var(--accent); }
-
-        .workspace { padding: 40px; overflow-y: auto; }
-        .panel-view { display: none; }
-        .panel-view.active { display: block; animation: fadeIn 0.4s forwards; }
-
-        /* الحقول والأزرار */
-        .glass-card { background: var(--card); border: 1px solid var(--border); padding: 30px; border-radius: 20px; }
-        input, textarea { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid var(--border); border-radius: 12px; background: #080810; color: white; box-sizing: border-box; }
-        .btn-kick { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 12px; cursor: pointer; width: 100%; font-weight: bold; font-size: 15px; }
-
-        /* المعاينة المتطورة */
-        .preview-stack { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 15px; }
-        .img-item { position: relative; width: 90px; height: 90px; }
-        .img-item img { width: 100%; height: 100%; border-radius: 12px; object-fit: cover; border: 2px solid var(--border); }
-        .btn-kill { position: absolute; top: -10px; right: -10px; background: #f64e60; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* اللوحة الرئيسية */
+        #main-app { display: none; padding: 40px; }
+        .glass-card { background: var(--card); padding: 30px; border-radius: 15px; border: 1px solid var(--border); max-width: 600px; margin: auto; }
+        
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; box-sizing: border-box; }
+        .btn-kick { background: var(--accent); color: #fff; border: none; padding: 15px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+        .btn-kick:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
 
     <div id="auth-layer">
         <div class="auth-box">
-            <h2 style="margin-bottom: 30px; letter-spacing: 2px;">AUTHENTICATION</h2>
-            <input type="text" id="input-user" placeholder="اليوزر نيم">
-            <input type="password" id="input-pass" placeholder="كلمة المرور">
-            <button class="btn-kick" onclick="engineLogin()">فتح اللوحة</button>
+            <h2 style="color:var(--accent)">تسجيل الدخول</h2>
+            <input type="text" id="u-name" placeholder="اسم المستخدم">
+            <input type="password" id="u-pass" placeholder="كلمة المرور">
+            <button class="btn-kick" onclick="runLogin()">دخول النظام</button>
         </div>
     </div>
 
     <div id="main-app">
-        <aside class="sidebar">
-            <div class="profile-section">
-                <img id="admin-img" src="https://via.placeholder.com/90">
-                <h3 id="admin-nick" style="margin: 0; font-size: 18px;">محمد أمين</h3>
-            </div>
-            <nav style="flex: 1;">
-                <button class="nav-btn active" onclick="uiNavigate('view-post', this)">➕ مشروع جديد</button>
-                <button class="nav-btn" onclick="uiNavigate('view-user', this)">👤 إعدادات الحساب</button>
-                <button class="nav-btn" onclick="uiNavigate('view-stats', this)">📊 الإحصائيات</button>
-            </nav>
-            <button class="nav-btn" onclick="uiToggleTheme()">🌓 تبديل الوضع</button>
-        </aside>
-
-        <main class="workspace">
-            <section id="view-post" class="panel-view active">
-                <div class="glass-card">
-                    <h3>نشر مشروع جديد</h3>
-                    <input type="text" id="post-type" placeholder="التصنيف (مثلاً: Minecraft Mods)">
-                    <input type="text" id="post-title" placeholder="اسم المشروع">
-                    
-                    <div style="margin: 20px 0;">
-                        <label>أيقونة المشروع:</label>
-                        <div style="display:flex; gap:10px;">
-                            <button type="button" onclick="document.getElementById('file-icon').click()">رفع أيقونة</button>
-                            <input type="text" id="post-icon-url" placeholder="أو رابط مباشر" style="flex:1;">
-                        </div>
-                        <input type="file" id="file-icon" hidden onchange="uiPreview(this, 'box-icon', false)">
-                        <div id="box-icon" class="preview-stack"></div>
-                    </div>
-
-                    <textarea id="post-desc" placeholder="وصف المشروع بالتفصيل..." rows="6"></textarea>
-
-                    <div style="margin: 20px 0;">
-                        <label>معرض الصور (Screenshots):</label>
-                        <button type="button" onclick="document.getElementById('file-screens').click()">اختيار الصور</button>
-                        <input type="file" id="file-screens" hidden multiple onchange="uiPreview(this, 'box-screens', true)">
-                        <div id="box-screens" class="preview-stack"></div>
-                    </div>
-
-                    <div id="dynamic-links">
-                        <label>روابط التحميل:</label>
-                        <div style="display:flex; gap:10px; margin-bottom:10px;">
-                            <input type="text" class="link-src" placeholder="الرابط">
-                            <input type="text" class="link-label" placeholder="نص الزر">
-                            <button type="button" onclick="uiAddLink()" style="background:var(--accent); width:50px; color:white;">+</button>
-                        </div>
-                    </div>
-
-                    <button id="submit-project" class="btn-kick" onclick="enginePublish()">🚀 تنفيذ النشر الآن</button>
-                </div>
-            </section>
-
-            <section id="view-user" class="panel-view">
-                <div class="glass-card">
-                    <h3>تحديث بيانات المشرف</h3>
-                    <input type="text" id="new-nick" placeholder="الاسم المستعار">
-                    <input type="text" id="new-user" placeholder="اسم المستخدم">
-                    <input type="password" id="new-pass" placeholder="كلمة المرور">
-                    <button class="btn-kick" onclick="engineUpdateProfile()">حفظ التغييرات</button>
-                </div>
-            </section>
-
-            <section id="view-stats" class="panel-view">
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                    <div class="glass-card" style="text-align:center;"> <h1 id="stat-v">0</h1> <p>مشاهدات</p> </div>
-                    <div class="glass-card" style="text-align:center;"> <h1 id="stat-d">0</h1> <p>تحميلات</p> </div>
-                </div>
-            </section>
-        </main>
+        <div class="glass-card">
+            <h3>نشر مشروع جديد</h3>
+            <input type="text" id="p-title" placeholder="اسم المشروع">
+            <textarea id="p-desc" placeholder="الوصف" rows="4"></textarea>
+            <button id="p-btn" class="btn-kick" onclick="runPublish()">🚀 نشر الآن</button>
+            <p id="status" style="text-align:center; color: var(--accent);"></p>
+        </div>
     </div>
 
-    <script src="Mscript.js"></script>
+    <script>
+        // إعدادات Supabase
+        const _URL = 'https://ibqvftckjsyfnyembggc.supabase.co';
+        const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlicXZmdGNranN5Zm55ZW1iZ2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNDI3OTUsImV4cCI6MjA5MzkxODc5NX0.EQNGQz5ckjFa-2b0sFpZ6AWhWkYDl0YP5noN7vAcGK4';
+        const supabaseClient = supabase.createClient(_URL, _KEY);
+
+        // 1. دالة الدخول
+        function runLogin() {
+            const user = document.getElementById('u-name').value;
+            const pass = document.getElementById('u-pass').value;
+
+            // التأكد من جلب البيانات من التخزين أو استخدام الافتراضي
+            const validUser = localStorage.getItem('admin_user') || "admin";
+            const validPass = localStorage.getItem('admin_pass') || "MDaMiNeLD";
+
+            if (user === validUser && pass === validPass) {
+                document.getElementById('auth-layer').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                console.log("Login Success");
+            } else {
+                alert("بيانات خاطئة!");
+            }
+        }
+
+        // 2. دالة النشر
+        async function runPublish() {
+            const btn = document.getElementById('p-btn');
+            const title = document.getElementById('p-title').value;
+            const desc = document.getElementById('p-desc').value;
+
+            if (!title) return alert("أدخل العنوان!");
+
+            btn.disabled = true;
+            btn.innerText = "جاري النشر...";
+
+            try {
+                const { error } = await supabaseClient.from('projects').insert([{
+                    title: title,
+                    "desc": desc,
+                    views: 0,
+                    downloads: 0
+                }]);
+
+                if (error) throw error;
+
+                document.getElementById('status').innerText = "✅ تم النشر بنجاح!";
+                setTimeout(() => location.reload(), 2000);
+            } catch (err) {
+                alert("خطأ: " + err.message);
+                btn.disabled = false;
+                btn.innerText = "🚀 نشر الآن";
+            }
+        }
+    </script>
 </body>
 </html>
