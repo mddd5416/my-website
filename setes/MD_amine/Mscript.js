@@ -1,162 +1,126 @@
-const _URL = 'https://ibqvftckjsyfnyembggc.supabase.co';
-const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlicXZmdGNranN5Zm55ZW1iZ2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNDI3OTUsImV4cCI6MjA5MzkxODc5NX0.EQNGQz5ckjFa-2b0sFpZ6AWhWkYDl0YP5noN7vAcGK4';
-const sb = supabase.createClient(_URL, _KEY);
+const _SB_URL = 'https://ibqvftckjsyfnyembggc.supabase.co';
+const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlicXZmdGNranN5Zm55ZW1iZ2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNDI3OTUsImV4cCI6MjA5MzkxODc5NX0.EQNGQz5ckjFa-2b0sFpZ6AWhWkYDl0YP5noN7vAcGK4';
+const sb = supabase.createClient(_SB_URL, _SB_KEY);
 
-let selectedScreenshots = []; // لتخزين الصور المختارة محلياً دون حذف القديم
-
-const app = {
-    // 1. إدارة الدخول (حل مشكلة التحديث)
-    init: function() {
-        if (sessionStorage.getItem('isLoggedIn') === 'true') {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('app-wrapper').style.display = 'grid';
-            this.loadUserData();
-            this.fetchProjects();
-        }
-    },
-
-    login: function() {
-        const u = document.getElementById('user-in').value;
-        const p = document.getElementById('pass-in').value;
-        if (u === (localStorage.getItem('admin_user') || "admin") && p === (localStorage.getItem('admin_pass') || "MDaMiNeLD")) {
-            sessionStorage.setItem('isLoggedIn', 'true');
-            location.reload();
-        } else alert("بيانات غير صحيحة");
-    },
-
-    // 2. إدارة الواجهات
-    setTab: function(tabId) {
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        document.getElementById('tab-' + tabId).classList.add('active');
-        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-    },
-
-    showProfile: function() {
-        document.getElementById('main-sidebar').style.display = 'none';
-        document.getElementById('content-area').style.display = 'none';
-        document.getElementById('profile-view').style.display = 'flex';
-    },
-
-    hideProfile: function() {
-        document.getElementById('profile-view').style.display = 'none';
-        document.getElementById('main-sidebar').style.display = 'flex';
-        document.getElementById('content-area').style.display = 'block';
-    },
-
-    // 3. إدارة الملفات والصور (حل مشكلة الصور المتعددة)
-    previewScreens: function(input) {
-        const box = document.getElementById('screens-preview-box');
-        const files = Array.from(input.files);
-        
-        files.forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const id = Date.now() + index;
-                selectedScreenshots.push({ id: id, file: file, url: e.target.result });
-                this.renderScreensPreview();
-            };
-            reader.readAsDataURL(file);
-        });
-    },
-
-    renderScreensPreview: function() {
-        const box = document.getElementById('screens-preview-box');
-        box.innerHTML = selectedScreenshots.map(img => `
-            <div class="screen-item">
-                <img src="${img.url}">
-                <button onclick="app.removePreview(${img.id})">×</button>
-            </div>
-        `).join('');
-    },
-
-    removePreview: function(id) {
-        selectedScreenshots = selectedScreenshots.filter(item => item.id !== id);
-        this.renderScreensPreview();
-    },
-
-    // 4. الحفظ والنشر
-    saveProject: async function() {
-        const btn = event.currentTarget;
-        btn.disabled = true; btn.innerText = "جاري المعالجة...";
-        
-        try {
-            // منطق الرفع هنا (أيقونة + سكرينشوتات)
-            const iconFile = document.getElementById('p-icon').files[0];
-            let iconUrl = "";
-            if (iconFile) {
-                const path = `icons/${Date.now()}_${iconFile.name}`;
-                await sb.storage.from('media').upload(path, iconFile);
-                iconUrl = sb.storage.from('media').getPublicUrl(path).data.publicUrl;
-            }
-
-            // رفع السكرينشوتات
-            const screenUrls = [];
-            for (let item of selectedScreenshots) {
-                const path = `screens/${Date.now()}_${item.id}`;
-                await sb.storage.from('media').upload(path, item.file);
-                screenUrls.push(sb.storage.from('media').getPublicUrl(path).data.publicUrl);
-            }
-
-            const data = {
-                title: document.getElementById('p-title').value,
-                type: document.getElementById('p-type').value,
-                desc: document.getElementById('p-desc').value,
-                icon_url: iconUrl,
-                screenshots: screenUrls,
-                link: document.querySelector('.l-url').value,
-                btn_text: document.querySelector('.l-txt').value
-            };
-
-            const editId = document.getElementById('edit-id').value;
-            if (editId) await sb.from('projects').update(data).eq('id', editId);
-            else await sb.from('projects').insert([data]);
-
-            alert("تم الحفظ بنجاح");
-            location.reload();
-        } catch (e) { alert(e.message); btn.disabled = false; }
-    },
-
-    // 5. تعديل البروفايل
-    toggleEdit: function(id) {
-        const el = document.getElementById(id);
-        if (el.readOnly) {
-            el.readOnly = false; el.focus();
-            event.currentTarget.innerText = "💾";
-        } else {
-            el.readOnly = true;
-            localStorage.setItem('md_' + id, el.value);
-            event.currentTarget.innerText = "✎";
-            alert("تم حفظ التعديل محلياً");
-        }
-    },
-
-    loadUserData: function() {
-        document.getElementById('prof-name').value = localStorage.getItem('md_prof-name') || "محمد أمين";
-        document.getElementById('prof-user').value = localStorage.getItem('admin_user') || "admin";
-        document.getElementById('prof-bio').value = localStorage.getItem('md_prof-bio') || "مطور برمجيات وأنظمة";
-        const av = localStorage.getItem('md_avatar');
-        if(av) {
-            document.getElementById('side-avatar').src = av;
-            document.getElementById('large-avatar').src = av;
-        }
-    },
-
-    updateAvatar: async function(input) {
-        const file = input.files[0];
-        const path = `avatars/${Date.now()}_admin`;
-        await sb.storage.from('media').upload(path, file);
-        const url = sb.storage.from('media').getPublicUrl(path).data.publicUrl;
-        localStorage.setItem('md_avatar', url);
-        location.reload();
-    },
-
-    addLinkRow: function() {
-        const row = document.createElement('div');
-        row.className = "link-row";
-        row.innerHTML = `<input type="text" class="l-url" placeholder="الرابط"><input type="text" class="l-txt" placeholder="الاسم"><button onclick="this.parentElement.remove()">×</button>`;
-        document.getElementById('links-wrapper').appendChild(row);
-    }
+window.onload = () => {
+    document.getElementById('do-login').onclick = authLogin;
+    document.getElementById('do-publish').onclick = handlePublish;
+    document.getElementById('do-update-set').onclick = updateProfile;
+    document.getElementById('change-avatar-trigger').onclick = () => document.getElementById('f-avatar').click();
+    document.getElementById('f-avatar').onchange = (e) => uploadAvatar(e.target);
 };
 
-app.init();
+function authLogin() {
+    const u = document.getElementById('log-u').value;
+    const p = document.getElementById('log-p').value;
+    if (u === (localStorage.getItem('admin_user') || "admin") && p === (localStorage.getItem('admin_pass') || "MDaMiNeLD")) {
+        document.getElementById('auth-layer').style.display = 'none';
+        document.getElementById('main-app').style.display = 'grid';
+        loadDashboard();
+    } else alert("خطأ في بيانات الدخول");
+}
+
+async function loadDashboard() {
+    document.getElementById('display-name').innerText = localStorage.getItem('md_name') || "محمد أمين";
+    document.getElementById('admin-img').src = localStorage.getItem('md_avatar') || "https://via.placeholder.com/90";
+    
+    const { data } = await sb.from('projects').select('*').order('created_at', { ascending: false });
+    renderManageList(data || []);
+    
+    const views = data?.reduce((acc, curr) => acc + (curr.views || 0), 0);
+    const downloads = data?.reduce((acc, curr) => acc + (curr.downloads || 0), 0);
+    document.getElementById('v-count').innerText = views || 0;
+    document.getElementById('d-count').innerText = downloads || 0;
+}
+
+async function uploadAvatar(input) {
+    if (!input.files[0]) return;
+    const file = input.files[0];
+    const path = `avatars/${Date.now()}_${file.name}`;
+    await sb.storage.from('media').upload(path, file);
+    const url = sb.storage.from('media').getPublicUrl(path).data.publicUrl;
+    localStorage.setItem('md_avatar', url);
+    document.getElementById('admin-img').src = url;
+}
+
+async function handlePublish() {
+    const btn = document.getElementById('do-publish');
+    const editId = document.getElementById('edit-target-id').value;
+    btn.disabled = true;
+
+    let iconUrl = "";
+    if (document.getElementById('f-icon').files[0]) {
+        const file = document.getElementById('f-icon').files[0];
+        const path = `icons/${Date.now()}_${file.name}`;
+        await sb.storage.from('media').upload(path, file);
+        iconUrl = sb.storage.from('media').getPublicUrl(path).data.publicUrl;
+    }
+
+    const payload = {
+        title: document.getElementById('p-title').value,
+        type: document.getElementById('p-type').value,
+        desc: document.getElementById('p-desc').value,
+        link: document.querySelector('.l-url').value,
+        btn_text: document.querySelector('.l-txt').value
+    };
+    if (iconUrl) payload.icon_url = iconUrl;
+
+    if (editId) await sb.from('projects').update(payload).eq('id', editId);
+    else await sb.from('projects').insert([payload]);
+
+    alert("تم التنفيذ بنجاح"); location.reload();
+}
+
+function renderManageList(items) {
+    const box = document.getElementById('list-holder');
+    box.innerHTML = items.map(i => `
+        <div class="project-row">
+            <div><strong>${i.title}</strong> <span style="font-size:12px; color:#64748b">(${i.type})</span></div>
+            <div>
+                <button onclick="prepareEdit('${i.id}')" style="color:var(--accent); border:none; background:none; cursor:pointer;">تعديل</button>
+                <button onclick="deleteProject('${i.id}')" style="color:#ef4444; border:none; background:none; cursor:pointer; margin-right:15px;">حذف</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.prepareEdit = async (id) => {
+    const { data } = await sb.from('projects').select('*').eq('id', id).single();
+    document.getElementById('edit-target-id').value = data.id;
+    document.getElementById('p-title').value = data.title;
+    document.getElementById('p-type').value = data.type;
+    document.getElementById('p-desc').value = data.desc;
+    document.getElementById('form-mode-title').innerText = "تعديل: " + data.title;
+    uiNav('p-add', document.querySelector('.nav-btn'));
+};
+
+async function deleteProject(id) {
+    if (confirm("هل تريد حذف هذا المشروع نهائياً؟")) {
+        await sb.from('projects').delete().eq('id', id);
+        loadDashboard();
+    }
+}
+
+function uiNav(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function updateProfile() {
+    const n = document.getElementById('set-name').value;
+    const u = document.getElementById('set-user').value;
+    const p = document.getElementById('set-pass').value;
+    if (n) localStorage.setItem('md_name', n);
+    if (u) localStorage.setItem('admin_user', u);
+    if (p) localStorage.setItem('admin_pass', p);
+    alert("تم تحديث إعدادات الأمان"); location.reload();
+}
+
+function uiAddLink() {
+    const div = document.createElement('div');
+    div.style.display="flex"; div.style.gap="10px"; div.style.marginBottom="10px";
+    div.innerHTML = `<input type="text" class="l-url" placeholder="الرابط"><input type="text" class="l-txt" placeholder="نص الزر"><button onclick="this.parentElement.remove()" style="background:#ef4444; color:white; border:none; border-radius:8px; width:50px">-</button>`;
+    document.getElementById('links-container').appendChild(div);
+}
