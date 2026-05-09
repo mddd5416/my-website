@@ -3,71 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مختبر محمد أمين</title>
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>لوحة التحكم | محمد أمين</title>
     <style>
-        :root { --bg: #f8f9fa; --card: #ffffff; --text: #3c4043; --accent: #1a73e8; --border: #dadce0; }
-        [data-theme="dark"] { --bg: #121212; --card: #1e1e1e; --text: #e8eaed; --accent: #8ab4f8; --border: #3c4043; }
+        :root { --sidebar-bg: #1a1a27; --main-bg: #151521; --accent: #3699ff; --text: #ffffff; --card: #1e1e2d; --input-bg: #151521; --border: #2b2b40; }
+        [data-theme="light"] { --sidebar-bg: #f0f2f5; --main-bg: #ffffff; --accent: #1a73e8; --text: #1d1d1f; --card: #f8f9fa; --input-bg: #ffffff; --border: #dadce0; }
         
-        body { background: var(--bg); color: var(--text); font-family: 'Google Sans', sans-serif; transition: 0.3s; margin: 0; overflow-x: hidden; }
-        header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
+        body { margin: 0; display: flex; font-family: 'Segoe UI', sans-serif; background: var(--main-bg); color: var(--text); transition: 0.3s; min-height: 100vh; }
+        
+        /* شاشة الدخول */
+        #login-screen { position: fixed; inset: 0; background: var(--main-bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: var(--card); padding: 30px; border-radius: 16px; border: 1px solid var(--border); width: 350px; text-align: center; }
 
-        .main-layout { display: flex; height: calc(100vh - 70px); transition: 0.5s ease; }
-        .projects-grid { flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; overflow-y: auto; transition: 0.5s ease; }
+        /* الشريط الجانبي */
+        .sidebar { width: 280px; background: var(--sidebar-bg); height: 100vh; position: fixed; right: 0; padding: 25px; border-left: 1px solid var(--border); z-index: 100; }
+        .sidebar-header { text-align: center; margin-bottom: 30px; }
+        .sidebar-header img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; }
         
-        /* منع خروج النص */
-        .card { 
-            background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; 
-            cursor: pointer; transition: 0.3s; height: fit-content; 
-            word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;
-        }
-        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
-        .card h3 { margin: 0 0 10px 0; color: var(--accent); }
-        .card p { font-size: 14px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; color: #888; }
-        
-        /* واجهة العرض الجانبي (نظام النصفين) */
-        #detail-view { 
-            flex: 0 0 40%; background: var(--card); border-right: 1px solid var(--border); 
-            padding: 40px; display: none; overflow-y: auto; animation: slideIn 0.5s ease;
-            word-wrap: break-word; overflow-wrap: break-word;
-        }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .nav-item { padding: 14px; cursor: pointer; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; color: #a2a3b7; transition: 0.2s; }
+        .nav-item:hover, .nav-item.active { background: var(--accent); color: white; }
 
-        .screenshot-gallery { display: flex; gap: 10px; overflow-x: auto; margin: 20px 0; padding-bottom: 10px; scrollbar-width: thin; }
-        .screenshot-gallery img { height: 220px; border-radius: 12px; border: 1px solid var(--border); flex-shrink: 0; transition: 0.3s; cursor: zoom-in; }
-        .close-btn { font-size: 18px; cursor: pointer; color: var(--accent); font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+        /* المحتوى الرئيسي */
+        .main-content { margin-right: 330px; flex: 1; padding: 40px; }
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
         
-        .btn-main { background: var(--accent); color: white; border: none; padding: 12px 25px; border-radius: 12px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
+        .form-group { background: var(--card); padding: 25px; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border); }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--input-bg); color: var(--text); outline: none; box-sizing: border-box; }
+        
+        .btn-submit { width: 100%; padding: 15px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-secondary { background: var(--border); color: var(--text); border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; }
+        
+        .preview-box { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .preview-box img { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; border: 2px solid var(--accent); }
+        .hidden { display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body data-theme="dark">
-    <header>
-        <div style="display:flex; align-items:center; gap:12px;">
-            <img id="header-avatar" src="https://via.placeholder.com/38" style="width:38px; height:38px; border-radius:50%; object-fit: cover;">
-            <span id="admin-name-display" style="font-weight: bold;">محمد أمين</span>
-        </div>
-        <button onclick="toggleTheme()" id="theme-toggle-btn" style="background: var(--accent); color: white; border: none; padding: 8px 18px; border-radius: 20px; cursor: pointer;">الوضع الفاتح</button>
-    </header>
 
-    <div class="main-layout">
-        <div id="detail-view">
-            <span class="close-btn" onclick="closeDetail()">🔙 العودة للمشاريع</span>
-            <div id="detail-content"></div>
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="color:var(--accent);">ROOT ACCESS</h2>
+            <input type="text" id="login-user" placeholder="اسم المستخدم">
+            <input type="password" id="login-pass" placeholder="كلمة المرور">
+            <button class="btn-submit" onclick="checkLogin()">دخول النظام</button>
         </div>
-        <div class="projects-grid" id="projects-list">
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img id="admin-avatar-sidebar" src="https://via.placeholder.com/80">
+            <h3 id="admin-name-sidebar">محمد أمين</h3>
+        </div>
+        <div class="nav-item active" onclick="switchSection('new-project', this)">➕ نشر مشروع</div>
+        <div class="nav-item" onclick="switchSection('profile', this)">👤 الحساب</div>
+        <div class="nav-item" onclick="switchSection('stats', this)">📊 الإحصائيات</div>
+        <div class="nav-item" onclick="toggleManagerTheme()">🌓 تبديل الوضع</div>
+    </div>
+
+    <div class="main-content">
+        <div id="new-project" class="section active">
+            <div class="form-group">
+                <h3>إضافة مشروع جديد</h3>
+                <input type="text" id="p-type" placeholder="نوع المشروع (مثل: تطبيقات أندرويد)">
+                <input type="text" id="p-title" placeholder="اسم المشروع">
+                
+                <div style="border: 1px dashed var(--border); padding: 15px; border-radius: 10px; margin: 10px 0;">
+                    <p>أيقونة المشروع</p>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('icon-file').click()">رفع ملف</button>
+                        <input type="text" id="icon-url-inp" placeholder="أو ضع رابط مباشر" style="flex:1;">
+                    </div>
+                    <input type="file" id="icon-file" class="hidden" onchange="previewIcon(this)">
+                    <div id="icon-preview" class="preview-box"></div>
+                </div>
+
+                <textarea id="p-desc" placeholder="وصف المشروع..." rows="4"></textarea>
+
+                <div style="border: 1px dashed var(--border); padding: 15px; border-radius: 10px; margin: 10px 0;">
+                    <p>صور المعرض (Screenshots)</p>
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('screens-file').click()">اختيار صور</button>
+                    <input type="file" id="screens-file" class="hidden" multiple onchange="previewScreenshots(this)">
+                    <div id="screens-preview" class="preview-box"></div>
+                </div>
+
+                <div id="links-container">
+                    <p>روابط التحميل</p>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" class="link-url" placeholder="الرابط">
+                        <input type="text" class="link-text" placeholder="نص الزر (مثلاً: تحميل)">
+                        <button type="button" class="btn-secondary" onclick="addNewLinkField()">+</button>
+                    </div>
+                </div>
+
+                <button class="btn-submit" id="publish-btn" onclick="publishProject()">🚀 نشر المشروع الآن</button>
             </div>
+        </div>
+
+        <div id="profile" class="section">
+            <div class="form-group">
+                <h3>تحديث بيانات الحساب</h3>
+                <input type="file" id="new-profile-file" accept="image/*">
+                <input type="text" id="edit-name" placeholder="الاسم المستعار الجديد">
+                <input type="text" id="edit-user" placeholder="اسم المستخدم الجديد">
+                <input type="password" id="edit-pass" placeholder="كلمة المرور الجديدة">
+                <button class="btn-submit" onclick="updateAdminProfile()">حفظ التعديلات</button>
+            </div>
+        </div>
+
+        <div id="stats" class="section">
+            <div class="form-group">
+                <h3>إحصائيات عامة</h3>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; text-align:center;">
+                    <div style="padding:20px; background:var(--input-bg); border-radius:12px; border:1px solid var(--border);">
+                        <h2 id="total-views" style="color:var(--accent);">0</h2> <p>إجمالي المشاهدات</p>
+                    </div>
+                    <div style="padding:20px; background:var(--input-bg); border-radius:12px; border:1px solid var(--border);">
+                        <h2 id="total-downloads" style="color:var(--accent);">0</h2> <p>إجمالي التحميلات</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="Uscript.js"></script>
-    <script>
-        function toggleTheme() {
-            const body = document.body;
-            const btn = document.getElementById('theme-toggle-btn');
-            const isDark = body.getAttribute('data-theme') === 'dark';
-            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            btn.innerText = isDark ? 'الوضع المظلم' : 'الوضع الفاتح';
-        }
-    </script>
+    <script src="Mscript.js"></script>
 </body>
 </html>
