@@ -1,52 +1,59 @@
-// Manager_login_script.js
+// manage_panel_script.js
 
-// 1. إعدادات الاتصال بـ Supabase (ضع بياناتك هنا)
-const SB_URL = 'https://your-project-id.supabase.co';
-const SB_KEY = 'your-anon-key';
+// 1. الإعدادات والربط
+const SB_URL = 'https://ibqvftckjsyfnyembggc.supabase.co';
+const SB_KEY = 'F3mh2H56GV_fVlg81gDRDA_cpKDnYt_'; // تأكد من المفتاح الكامل هنا
 const sb = supabase.createClient(SB_URL, SB_KEY);
 
-// 2. محرك التحقق من الدخول
-document.getElementById('loginBtn').addEventListener('click', async () => {
-    const userInput = document.getElementById('manager-user').value;
-    const passInput = document.getElementById('manager-pass').value;
-    const btn = document.getElementById('loginBtn');
-
-    if (!userInput || !passInput) {
-        alert("يرجى ملء كافة الحقول");
-        return;
+// 2. حماية الصفحة: التأكد من وجود الجلسة
+(function checkAuth() {
+    if (!sessionStorage.getItem('manager_access_token')) {
+        window.location.replace('Manager_login_page.html');
+    } else {
+        document.getElementById('main-wrapper').style.display = 'grid';
     }
+})();
 
-    btn.disabled = true;
-    btn.innerText = "جاري التحقق...";
+// 3. التبديل بين الأقسام
+function showSec(id, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+}
 
-    try {
-        // جلب بيانات المسؤول الحالية من جدول الإعدادات
-        // هذا يضمن أنك إذا غيرت اليوزر أو الباسورد من الداخل، سيعمل هنا فوراً
-        const { data, error } = await sb
-            .from('admin_settings')
-            .select('admin_user, admin_pass')
-            .eq('id', 1) // السطر الوحيد الخاص بالمدير
-            .single();
+// 4. تحديث بيانات المانجر (اليوزر والباسورد)
+async function updateAdminAuth() {
+    const newUser = document.getElementById('new-admin-user').value;
+    const newPass = document.getElementById('new-admin-pass').value;
 
-        if (error) throw error;
+    if(!newUser || !newPass) return alert("املأ الحقول أولاً");
 
-        // التحقق من المطابقة
-        if (userInput === data.admin_user && passInput === data.admin_pass) {
-            // إنشاء توكن الجلسة (لإخبار صفحة المانجر بانل أنك مسجل دخول)
-            const sessionToken = btoa(userInput + ":" + Date.now());
-            sessionStorage.setItem('manager_access_token', sessionToken);
-            
-            // الانتقال لصفحة لوحة التحكم
-            window.location.href = 'manage_panel_page.html';
-        } else {
-            alert("اسم المستخدم أو كلمة المرور غير صحيحة");
-            btn.disabled = false;
-            btn.innerText = "دخول";
-        }
-    } catch (err) {
-        console.error("Connection Error:", err);
-        alert("حدث خطأ في الاتصال بقاعدة البيانات");
-        btn.disabled = false;
-        btn.innerText = "دخول";
-    }
-});
+    const { error } = await sb
+        .from('admin_settings')
+        .update({ admin_user: newUser, admin_pass: newPass })
+        .eq('id', 1);
+
+    if (error) alert("حدث خطأ أثناء التحديث");
+    else alert("تم تحديث بيانات المانجر بنجاح! سيتم تطبيقها في الدخول القادم.");
+}
+
+// 5. تحديث كلمة سر الزوار
+async function updateInviteAuth() {
+    const newInvPass = document.getElementById('new-invite-pass').value;
+
+    if(!newInvPass) return alert("أدخل كلمة السر الجديدة");
+
+    const { error } = await sb
+        .from('admin_settings')
+        .update({ invite_pass: newInvPass })
+        .eq('id', 1);
+
+    if (error) alert("حدث خطأ");
+    else alert("تم تغيير كلمة سر الزوار بنجاح.");
+}
+
+function logout() {
+    sessionStorage.clear();
+    window.location.replace('Manager_login_page.html');
+}
